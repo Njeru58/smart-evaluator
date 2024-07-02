@@ -1,0 +1,71 @@
+{% extends 'layout/base.html' %}
+{% block title %} Question Bank | Play {% endblock title %}
+
+{% block content %}
+{% if not question %}
+<div class="container">
+  <div class="jumbotron my-4">
+    <h1> NO Questions available at the moment! Try again later </h1>
+  </div>
+</div>
+{% else %}
+<div class="container">
+  <div class="jumbotron my-4">
+    <h3 class="text-primary">{{ question.question_text }}</h3>
+    {% if error_message %}
+    <div class="alert alert-danger">{{ error_message }}</div>
+    {% endif %}
+    <form class="form" action="" method="post" onsubmit="return validateForm()" {% if feedback %}disabled{% endif %}>
+        {% csrf_token %}
+        <div class="form-check mx-4">
+            <input class="form-check-input" type="radio" name="selected_option" id="choice1" value="1" {% if selected_option == 1 %}checked{% endif %} {% if feedback %}disabled{% endif %}>
+            <label class="form-check-label" for="choice1">
+               A. {{ question.option1 }}
+            </label>
+        </div>
+        <div class="form-check mx-4">
+            <input class="form-check-input" type="radio" name="selected_option" id="choice2" value="2" {% if selected_option == 2 %}checked{% endif %} {% if feedback %}disabled{% endif %}>
+            <label class="form-check-label" for="choice2">
+               B. {{ question.option2 }}
+            </label>
+        </div>
+        <div class="form-check mx-4">
+            <input class="form-check-input" type="radio" name="selected_option" id="choice3" value="3" {% if selected_option == 3 %}checked{% endif %} {% if feedback %}disabled{% endif %}>
+            <label class="form-check-label" for="choice3">
+               C. {{ question.option3 }}
+            </label>
+        </div>
+        <div class="form-check mx-4">
+            <input class="form-check-input" type="radio" name="selected_option" id="choice4" value="4" {% if selected_option == 4 %}checked{% endif %} {% if feedback %}disabled{% endif %}>
+            <label class="form-check-label" for="choice4">
+               D. {{ question.option4 }}
+            </label>
+        </div>
+        <input class="btn btn-danger btn-lg mt-4" type="submit" value="Submit" {% if feedback %}disabled{% endif %}>
+    </form>
+    {% if feedback %}
+    <div class="alert alert-info mt-4">{{ feedback }}</div>
+    <form action="" method="post">
+        {% csrf_token %}
+        <input class="btn btn-primary btn-lg mt-4" type="submit" value="Next">
+    </form>
+    {% endif %}
+    <div class="mt-4">
+        Question {{ question_number }} of {{ total_questions }}
+    </div>
+  </div>
+</div>
+{% endif %}
+<script>
+function validateForm() {
+    const options = document.getElementsByName('selected_option');
+    for (let i = 0; i < options.length; i++) {
+        if (options[i].checked) {
+            return true;
+        }
+    }
+    alert('Please select an option before submitting.');
+    return false;
+}
+</script>
+{% endblock content %}

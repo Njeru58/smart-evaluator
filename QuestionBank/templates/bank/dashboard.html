@@ -1,0 +1,57 @@
+{% extends 'layout/base.html' %}
+{% block title %} Question Bank | Welcome {% endblock title %}
+{% block content %}
+<div class="container my-4">
+    <div class="jumbotron">
+        <h2 class="text-center text-success">Welcome, {{ user.username }}!</h2>
+        <div class="text-center my-4">
+            <a href="{% url 'bank:generate_quiz' %}" class="btn btn-primary btn-lg">Play</a>
+        </div>
+        <h3 class="text-center text-info">Before you play the quiz, here are the rules:</h3>
+        <div class="row">
+            <div class="card border-info mx-4 my-4">
+                <div class="card-body">
+                    <h4 class="card-title">Rules:</h4>
+                    <p class="card-text">
+                        <ul style="list-style:decimal;">
+                            <li>All questions are multiple choice.</li>
+                            <li><span class="text-danger">Only one choice is correct.</span></li>
+                            <li>Questions are selected based on your rating.</li>
+                            <li>Answer questions as quickly as you can.</li>
+                            <li>Questions are displayed randomly for every user.</li>
+                            <li>You will be told whether your answer was correct or incorrect after submission.</li>
+                        </ul>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if no_questions %}
+<div class="modal fade" id="noQuestionsModal" tabindex="-1" role="dialog" aria-labelledby="noQuestionsModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="noQuestionsModalLabel">No Questions Available</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        There are no questions available for your current rating range. Please try again later.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function(){
+    $('#noQuestionsModal').modal('show');
+});
+</script>
+{% endif %}
+{% endblock content %}

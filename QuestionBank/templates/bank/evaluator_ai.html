@@ -1,0 +1,27 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}EvaluatorAI Topics{% endblock title %}
+
+{% block content %}
+<h1>Choose a Topic to Evaluate:</h1>
+
+<!-- Rules Section -->
+<div class="rules">
+    <h2>Rules:</h2>
+    <ul>
+        <li>Work Independently: No external help allowed.</li>
+        <li>Submit Once: Answers final upon submission.</li>
+        <li>No Plagiarism: Use your own words.</li>
+        <li>Follow Instructions: Adhere to all test guidelines.</li>
+        <li>Use Allowed Resources: Only use specified materials.</li>
+        <li>The questions are arranged topic-wise. Click on a topic to take the test.</li>
+    </ul>
+</div>
+
+<ul>
+    {% for ai_response in ai_responses %}
+        <li><a href="{% url 'bank:topic_questions' ai_response.id %}">{{ ai_response.topic }}</a></li>
+    {% endfor %}
+</ul>
+
+{% endblock content %}

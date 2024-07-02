@@ -1,0 +1,29 @@
+ <!-- Load static files at the beginning of your template -->
+
+{% extends 'layout/base.html' %}
+{% load static %} 
+{% block title %}Questions for {{ ai_response.topic }}{% endblock title %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/css/evaluator.css' %}">
+{% endblock css %}
+
+{% block content %}
+<h1>AI Response for: {{ ai_response.topic }}</h1>
+
+<form method="post" action="{% url 'bank:submit_answers' %}">
+    {% csrf_token %}
+
+    {% for question in ai_response.questions.all %}
+        <div class="question-container">
+            <p>{{ question.question_text }}</p>
+            <textarea name="answers[]" rows="4" cols="50"></textarea>
+            <input type="hidden" name="question_ids[]" value="{{ question.id }}">
+        </div>
+    {% endfor %}
+
+    <input type="hidden" name="ai_response_id" value="{{ ai_response.id }}">
+    <button type="submit">Submit Answers</button>
+</form>
+
+{% endblock content %}

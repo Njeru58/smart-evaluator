@@ -1,0 +1,78 @@
+{% extends 'layout/base.html' %}
+{% block title %} Question Bank | Submission Result {% endblock title %}
+{% block content %}
+<div class="container">
+  <div class="jumbotron my-4">
+    <h2>Quiz Results</h2>
+    <p class="text-center">You scored {{ correct_answers }} out of {{ total_questions }}</p>
+    <p class="text-center">Your current rating: {{ user_rating }}</p>
+    <ul class="list-group">
+      {% for response in responses %}
+      <li class="list-group-item">
+        <h5>{{ forloop.counter }}. {{ response.question.question_text }}</h5>
+        <form>
+          <div class="form-check mx-4">
+            <input class="form-check-input" type="radio" name="selected_option_{{ response.question.question_id }}" 
+                   id="choice1_{{ response.question.question_id }}" value="1"
+                   {% if response.selected_option == 1 %}checked{% endif %} disabled>
+            <label class="form-check-label {% if response.selected_option == 1 and not response.is_correct %}text-danger{% endif %}"
+                   for="choice1_{{ response.question.question_id }}">
+             A. {{ response.question.option1 }}
+            </label>
+            {% if response.selected_option != 1 and response.question.correct_option == 1 %}
+            <span class="text-success">(Correct Answer)</span>
+            {% endif %}
+          </div>
+          <div class="form-check mx-4">
+            <input class="form-check-input" type="radio" name="selected_option_{{ response.question.question_id }}" 
+                   id="choice2_{{ response.question.question_id }}" value="2"
+                   {% if response.selected_option == 2 %}checked{% endif %} disabled>
+            <label class="form-check-label {% if response.selected_option == 2 and not response.is_correct %}text-danger{% endif %}"
+                   for="choice2_{{ response.question.question_id }}">
+             B. {{ response.question.option2 }}
+            </label>
+            {% if response.selected_option != 2 and response.question.correct_option == 2 %}
+            <span class="text-success">(Correct Answer)</span>
+            {% endif %}
+          </div>
+          <div class="form-check mx-4">
+            <input class="form-check-input" type="radio" name="selected_option_{{ response.question.question_id }}" 
+                   id="choice3_{{ response.question.question_id }}" value="3"
+                   {% if response.selected_option == 3 %}checked{% endif %} disabled>
+            <label class="form-check-label {% if response.selected_option == 3 and not response.is_correct %}text-danger{% endif %}"
+                   for="choice3_{{ response.question.question_id }}">
+             C. {{ response.question.option3 }}
+            </label>
+            {% if response.selected_option != 3 and response.question.correct_option == 3 %}
+            <span class="text-success">(Correct Answer)</span>
+            {% endif %}
+          </div>
+          <div class="form-check mx-4">
+            <input class="form-check-input" type="radio" name="selected_option_{{ response.question.question_id }}" 
+                   id="choice4_{{ response.question.question_id }}" value="4"
+                   {% if response.selected_option == 4 %}checked{% endif %} disabled>
+            <label class="form-check-label {% if response.selected_option == 4 and not response.is_correct %}text-danger{% endif %}"
+                   for="choice4_{{ response.question.question_id }}">
+             D. {{ response.question.option4 }}
+            </label>
+            {% if response.selected_option != 4 and response.question.correct_option == 4 %}
+            <span class="text-success">(Correct Answer)</span>
+            {% endif %}
+          </div>
+        </form>
+        <div class="mt-3">
+          {% if response.is_correct %}
+          <span class="text-success"><i class="fa fa-check"></i> Correct!</span>
+          {% else %}
+          <span class="text-danger"><i class="fa fa-times"></i> Incorrect</span>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="text-center mt-4">
+      <a href="{% url 'bank:generate_quiz' %}" class="btn btn-primary">Take another quiz</a>
+    </div>
+  </div>
+</div>
+{% endblock content %}

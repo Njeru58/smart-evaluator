@@ -1,0 +1,53 @@
+
+
+    /* Custom CSS for specific styling adjustments */
+    .form-container {
+        background-color: #f2f2f2; /* Light gray background */
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 30px; /* Adjust top margin for spacing */
+        max-width: 800px; /* Limiting maximum width of the form container */
+        margin-left: auto; /* Center aligning the form container */
+        margin-right: auto;
+    }
+
+    h1 {
+        background-color: #4CAF50; /* Background color for the title */
+        color: white; /* Text color for the title */
+        padding: 10px 20px; /* Padding around the title */
+        border-radius: 5px; /* Rounded corners for the title */
+        text-align: center; /* Center aligning the title */
+    }
+
+    .question-container {
+        background-color: #ddd; /* Light gray background for each question */
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px; /* Spacing between questions */
+    }
+
+    .question-container p {
+        margin-bottom: 10px; /* Spacing between question text and answer field */
+    }
+
+    ol {
+        padding-left: 20px; /* Adding padding to the ordered list */
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    /* Smooth scrolling for anchor links */
+    html {
+        scroll-behavior: smooth;
+    }

@@ -1,0 +1,13 @@
+{% extends 'layout/base.html' %}
+{% block title %} Question Bank | Upload Successful {% endblock title %}
+{% block content %}
+
+<section id="section-jumbotron" class="jumbotron jumbotron-fluid d-flex justify-content-center align-items-center">
+  <div class="container text-center">
+    <h1 class="display-4 text-info">Upload Successful</h1>
+    <p class="lead">Your file has been successfully uploaded and processed.</p>
+    <a href="{% url 'bank:upload_file' %}" class="btn btn-primary">Upload another file</a>
+  </div>
+</section>
+
+{% endblock %}

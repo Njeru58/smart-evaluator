@@ -1,0 +1,80 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %} {% endblock title %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Rubik" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Rubik" rel="stylesheet">
+    
+   <link rel="stylesheet" href="{% static 'assets/css/main.css' %}">
+    {% block css %}
+    {% endblock css %} 
+
+</head>
+<body class="bg-white">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container">
+            <h1><a href="{% url 'bank:user_home' %}" class="navbar-brand">
+            <strong>Question Bank</strong></a></h1>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse justify-content-end " id="navbar">
+                {% if not request.user.is_active %}
+                <a href="{% url 'bank:login' %}" class="btn btn-success mt-1 ml-2"><i class="fa fa-sign-in" aria-hidden="true"></i> Log In</a>
+                {% else %}
+                <h6 class="text-white mt-2 mr-2">Welcome, {{ request.user.username }}</h6>
+                <h6 class="text-light mt-2 mr-2">|</h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:user_home' %}" class="text-info">Dashboard</a></h6>
+                <h6 class="text-light mt-2 mr-2">|</h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:generate_quiz' %}" class="text-info">Play </a></h6>
+                <h6 class="text-light mt-2 mr-2">|</h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:list_attempts' %}" class="text-success">Attempts</a></h6>
+                <h6 class="text-light mt-2 mr-2">|</h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluator_ai' %}" class="text-success">EvaluatorAI</a>
+                <h6 class="text-light mt-2 mr-2">|</h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluated_responses' %}" class="text-success">Evaluator Scores</a>
+                
+                
+
+                
+                {% if request.user.is_superuser %}
+                <h6 class="text-light mt-2 mr-2">|</h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:upload_file' %}" class="text-info">Upload</a></h6>
+                {% endif %}
+                <a href="{% url 'bank:logout' %}" class="btn btn-danger mt-1 ml-4">Log Out <i class="fa fa-sign-out" aria-hidden="true"></i></a>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </nav>
+
+    {% block content %}
+    {% endblock content %}
+    <footer class="bg-light text-muted py-0">
+        <div class="container py-4">
+            <ul class="list-inline mb-0 text-center">
+                <li class="list-inline-item">&copy; 2024 Question Bank.</li>
+                <li class="list-inline-item">&copy; 2024 Noxx Dev😎.</li>
+                <li class="list-inline-item">All rights reserved.</li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- jQuery first, then Bootstrap JS -->
+    <script src="{% static 'assets/js/vendor/jquery-3.2.1.slim.min.js' %}" ></script>
+    <script src="{% static 'assets/js/vendor/popper.min.js' %}" ></script>
+    <script src="{% static 'assets/js/vendor/bootstrap.min.js' %}" ></script>
+    <script src="{% static 'assets/js/vendor/smooth-scroll.min.js' %} " ></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+    {% block js %}{% endblock js %} 
+</body>
+</html>
+

@@ -1,0 +1,16 @@
+{% extends 'layout/base.html' %}
+{% block title %} Question Bank | Your Attempts {% endblock title %}
+{% block content %}
+<div class="container my-4">
+    <h2>Your Quiz Attempts</h2>
+    <ul class="list-group">
+        {% for data in attempt_data %}
+        <li class="list-group-item">
+            <a href="{% url 'bank:view_attempt' data.attempt.attempt_id %}">
+                Attempt on {{ data.attempt.timestamp|date:"Y-m-d H:i" }} - Score: {{ data.correct_answers }} / {{ data.total_questions }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock content %}

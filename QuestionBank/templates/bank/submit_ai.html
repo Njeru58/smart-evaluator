@@ -1,0 +1,38 @@
+<!-- submit_ai.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Submitted Answers</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Submitted Answers</h1>
+        <p><strong>Student Name:</strong> {{ student_name }}</p>
+
+        <h2>Answers:</h2>
+        {% if answers %}
+            <ul>
+                {% for topic_index, topic_answers in answers.items %}
+                    <li>
+                        <h3>Topic {{ topic_index }}</h3>
+                        <ul>
+                            {% for question_index, answer in topic_answers.items %}
+                                <li>
+                                    <strong>Question {{ question_index }}:</strong> {{ answer }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No answers submitted.</p>
+        {% endif %}
+
+        <a href="{% url 'bank:evaluator_ai' %}" class="btn btn-primary">Back to Questions</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,124 @@
+ID,Q,Aa,DIF [0-1],SUBJ,REF,Correct,A,B,C,D,Correct_Position
+1,DM1: Approximately half present with ____.,DKA,0.0,ENDO,ADA 2023,DKA,DKA,RADIAL,SERPINA1,100000,A
+2,"Screening criteria for Diabetes in Asymptomatic Adults: BMI>=25+RF, ____, prediabetes, age>35, HIV",GDM,0.0,ENDO,ADA 2023,GDM,55,STAPH AUREUS,GDM,PULMONARY EDEMA,C
+3,"Screening criteria for Diabetes in Asymptomatic Adults: BMI>=25+RF, GDM, ____, age>35, HIV",PREDIABETES,0.0,ENDO,ADA 2023,PREDIABETES,PREDIABETES,MCI,False,HCC,A
+4,"Screening criteria for Diabetes in Asymptomatic Adults: BMI>=25+RF, GDM, prediabetes, age>35, ____",HIV,0.0,ENDO,ADA 2023,HIV,PH MONITORING,AUDIOGRAM,DKA,HIV,D
+5,Long-term use of metformin may be associated with biochemical vitamin ____ deficiency,B12,0.0,ENDO,ADA 2023,B12,V617F,PREDNISONE,PULMONARY EDEMA,B12,D
+6,Positive HEAD IMPULSE test suggests a ____ etiology,PERIPHERAL,0.0,ENT,AFP 05/2023,PERIPHERAL,JAK2,INDIRECT INGUINAL,180,PERIPHERAL,D
+7,Clinicians should order an ____ when assessing a patient for Meniere disease,AUDIOGRAM,0.0,ENT,AFP 05/2023,AUDIOGRAM,AUDIOGRAM,C1,SCAPULA,MICROASPIRATION,A
+8,"Dizziness: Diabetes is a risk factor for occlusion of ____'s branch, supllying the inner ear",AICA,0.0,NEURO,PCM C166,AICA,AICA,HYDROXYUREA,JAK2,METOPROLOL,A
+9,EULAR/ACR (2019): an obligatory entry criterion for SLE Dx,ANA,0.0,RHEU,AFP 04/2023,ANA,1,KLEBSIELLA,ANA,SCAPULA,C
+10,The main adverse effect of Hydroxychloroquine is ____ toxicity,RETINAL,0.0,RHEU,AFP 04/2023,RETINAL,9,C1,RETINAL,PERIPHERAL,C
+11,SLE: ____ should be continued during pregnancy,HYDROXYCHLOROQUINE,0.0,RHEU,AFP 04/2023,HYDROXYCHLOROQUINE,SCHISTOSOMIASIS,HYDROXYCHLOROQUINE,False,EVALI,B
+12,"SLE: ____, azathioprine, and tacrolimus may be used in pregnancy if benefits outweigh risks",PREDNISONE,0.0,RHEU,AFP 04/2023,PREDNISONE,4,GLUCAGON,ALUMINUM,PREDNISONE,D
+13,"SLE: Prednisone, ____, and tacrolimus may be used in pregnancy if benefits outweigh risks",AZATHIOPRINE,0.0,RHEU,AFP 04/2023,AZATHIOPRINE,AZATHIOPRINE,4,V617F,HYPOXIA,A
+14,"SLE: Prednisone, azathioprine, and ____ may be used in pregnancy if benefits outweigh risks",TACROLIMUS,0.0,RHEU,AFP 04/2023,TACROLIMUS,PULMONARY EDEMA,TACROLIMUS,False,GLUCAGON,B
+15,Anti-____/SS-A and anti-La/SS-B antibodies may be present in patients with SLE and can be cardiotoxic to the fetus,RO,0.0,RHEU,AFP 04/2023,RO,SCHISTOSOMIASIS,JAK2,CANDIDA,RO,D
+16,Anti-Ro/SS-A and anti-____/SS-B antibodies may be present in patients with SLE and can be cardiotoxic to the fetus,LA,0.0,RHEU,AFP 04/2023,LA,METRONIDAZOLE,RETINAL,LA,B12,C
+17,Long Thoracic Nerve Entrapment: Winging of the ____,SCAPULA,0.0,NEURO,PCM C167,SCAPULA,V617F,SCAPULA,JAK2,MELANOMA,B
+18,____ Nerve Entrapment: Winging of the scapula,LONG THORACIC,0.0,NEURO,PCM C167,LONG THORACIC,SERPINA1,LUNG ABSCESS,LONG THORACIC,PREDIABETES,C
+19,Saturday night' palsy invloves what nerve?,RADIAL,0.0,NEURO,PCM C167,RADIAL,BPH,RADIAL,55,4,B
+20,The most common cause of femoral nerve injury,DIABETES,0.0,NEURO,PCM C167,DIABETES,HYDROXYUREA,ASPERGILLUS,TAMSULOSIN,DIABETES,D
+21,Spasticity and increased reflexes are evidence for ____ Motor Neuron lesion,UPPER,0.0,NEURO,PCM C167,UPPER,70,UPPER,MCI,VAGUS,B
+22,The most common ability lost in dementia,MEMORY,0.0,NEURO,PCM C169,MEMORY,JAK2,MEMORY,RO,KLEBSIELLA,B
+23,An intermediate state between normal aging and dementia,MCI,0.0,NEURO,PCM C169,MCI,45,ENAMEL,MCI,False,C
+24,Senile plaques containing ____,BETA AMYLOID,0.0,NEURO,PCM C169,BETA AMYLOID,DIASTASIS RECTI,BETA AMYLOID,RADIAL,HYDROXYUREA,B
+25,Neurofibrillary tangles composed of ____,TAU,0.0,NEURO,PCM C169,TAU,DKA,MCI,TAU,HIV,C
+26,The second most common cause of dementia,VASCULAR,0.0,NEURO,PCM C169,VASCULAR,CT,SCAPULA,VASCULAR,STAPH AUREUS,C
+27,"Dementia, gait disturbance, urinary incontinence",NPH,0.0,NEURO,PCM C169,NPH,COPROPORPHYRIN,NPH,PREDNISONE,RETINAL,B
+28,An A1C goal for many nonpregnant adults of <____% without significant hypoglycemia is appropriate.,7,0.0,ENDO,ADA 2023,7,NECROTIZING PNEUMONIA,7,FOLATE,GLUCAGON,B
+29,"If using AGP/GMI to assess glycemia, a parallel goal for many nonpregnant adults is TIR of >____% with TBR <4% and time <54 mg/dL <1%.",70,0.0,ENDO,ADA 2023,70,70,2,STD,ASBESTOS,A
+30,"If using AGP/GMI to assess glycemia, a parallel goal for many nonpregnant adults is TIR of >70% with TBR <____% and time <54 mg/dL <1%.",4,0.0,ENDO,ADA 2023,4,KLEBSIELLA,AUDIOGRAM,4,False,C
+31,"If using AGP/GMI to assess glycemia, a parallel goal for many nonpregnant adults is TIR of >70% with TBR <4% and time <54 mg/dL <____%.",1,0.0,ENDO,ADA 2023,1,PROSTATITIS,1,False,250,B
+32,"For those with frailty or at high risk of hypoglycemia, a target of >____% TIR with <1% TBR is recommended",50,0.0,ENDO,ADA 2023,50,50,LONG THORACIC,False,UPPER,A
+33,"For those with frailty or at high risk of hypoglycemia, a target of >50% TIR with <____% TBR is recommended",1,0.0,ENDO,ADA 2023,1,1,10,55,TB,A
+34,Level 2 hyperglycemia: >____ mg/dL,250,0.0,ENDO,ADA 2023,250,45,250,C1,4,B
+35,TIR: % of readings and time ____–180 mg/dL,70,0.0,ENDO,ADA 2023,70,GASTRIN,70,HYDROXYUREA,LEGIONELLA,B
+36,TIR: % of readings and time 70–____ mg/dL,180,0.0,ENDO,ADA 2023,180,180,False,1,PREDNISONE,A
+37,Level 2 hypoglycemia: <____ mg/dL,54,0.0,ENDO,ADA 2023,54,COPROPORPHYRIN,54,NPH,HINCHEY,B
+38,Glycemic variability (%CV) target =<____%,36,0.0,ENDO,ADA 2023,36,C1,METRONIDAZOLE,KLEBSIELLA,36,D
+39,Average Glucose Goal: <____ mg/dL,154,0.0,ENDO,ADA 2023,154,SERPINA1,HIV,POLYCYTHEMIA VERA,154,D
+40,____ should be prescribed for all individuals at increased risk of level 2 or 3 hypoglycemia,GLUCAGON,0.0,ENDO,ADA 2023,GLUCAGON,GLUCAGON,HYDROXYUREA,45,100000,A
+41,Early introduction of insulin should be considered when A1C levels >____%,10,0.0,ENDO,ADA 2023,10,2,7,10,1,C
+42,The most common cause of hirsutism,PCOS,0.0,ENDO,PCM C98,PCOS,C4,250,PCOS,AZATHIOPRINE,C
+43,Polycythemia Vera common mutation,V617F,0.0,HEMATO,PCM C80,V617F,LEGIONELLA,False,AZATHIOPRINE,V617F,D
+44,Polycythemia Vera commonly exhibit mutation in what gene?,JAK2,0.0,HEMATO,PCM C80,JAK2,54,JAK2,TESTOSTERONE,250,B
+45,Generalized pruritus after bathing is a classic symptom of ____,POLYCYTHEMIA VERA,0.0,HEMATO,PCM C80,POLYCYTHEMIA VERA,LONG THORACIC,PCOS,PROSTATITIS,POLYCYTHEMIA VERA,D
+46,What is the prefered myelosuppressive therapy for Polycythemia Vera,HYDROXYUREA,0.0,HEMATO,PCM C80,HYDROXYUREA,HYDROXYUREA,6,SERPINA1,C4,A
+47,What mutation cause Alpha1-antitrypsin def.?,SERPINA1,0.0,PULMO,PCM C47,SERPINA1,GPA,SERPINA1,1,STD,B
+48,"Alpha1-antitrypsin def. is a risk factor for ____, hepatitis, HCC, GPA, nec. pancreatitis",COPD,0.0,PULMO,PCM C47,COPD,1,COPD,6,36,B
+49,"Alpha1-antitrypsin def. is a risk factor for COPD, hepatitis, ____, GPA, nec. pancreatitis",HCC,0.0,PULMO,PCM C47,HCC,B12,HCC,PH MONITORING,5,B
+50,"Alpha1-antitrypsin def. is a risk factor for COPD, hepatitis, HCC, ____, nec. pancreatitis",GPA,0.0,PULMO,PCM C47,GPA,180,PULMONARY EDEMA,GPA,RETINAL,C
+51,Calcified hemidiaphragmatic plaques is the hallmark of ____ exposure,ASBESTOS,0.0,PULMO,PCM C39,ASBESTOS,ASBESTOS,PREDIABETES,KLEBSIELLA,False,A
+52,Smoking raise the risk for malignant mesothelioma,False,0.0,PULMO,PCM C39,False,250,False,HYDROXYUREA,SBP,B
+53,____ was foung to be related to vitamin E acetate,EVALI,0.0,PULMO,PCM C54-1,EVALI,GPA,EVALI,UPPER,5,B
+54,"Suspected EVALI with <95% desaturation, next step?",CXR,0.0,PULMO,PCM C54-1,CXR,2.5,B12,BETA AMYLOID,CXR,D
+55,Minimal CPAP use for clinical benefit (hr),4,0.0,PULMO,PCM C46,4,ALUMINUM,1,4,HYPOXIA,C
+56,Pink sputum is suggestive of,PULMONARY EDEMA,0.0,PULMO,PCM C42,PULMONARY EDEMA,CXR,154,LA,PULMONARY EDEMA,D
+57,Putrid sputum is suggestive of,LUNG ABSCESS,0.0,PULMO,PCM C42,LUNG ABSCESS,False,LUNG ABSCESS,CYCLOPHOSPHAMIDE,1,B
+58,Currant jelly sputum is suggestive of,NECROTIZING PNEUMONIA,0.0,PULMO,PCM C42,NECROTIZING PNEUMONIA,NECROTIZING PNEUMONIA,TACHYPHYLAXIS,CAP,50,A
+59,The most common cause of hemoptysis,BRONCHITIS,0.0,PULMO,PCM C42,BRONCHITIS,5,BRONCHITIS,KLEBSIELLA,SERPINA1,B
+60,Which organism is associated with necrotizing pneumonia?,KLEBSIELLA,0.0,PULMO,PCM C42,KLEBSIELLA,KLEBSIELLA,False,GDM,PH MONITORING,A
+61,Which organism is associated with necrotizing pneumonia?,STAPH AUREUS,0.0,PULMO,PCM C42,STAPH AUREUS,1,STAPH AUREUS,C1,CAP,B
+62,Which organism is associated with necrotizing pneumonia?,LEGIONELLA,0.0,PULMO,PCM C42,LEGIONELLA,GASTRIN,LEGIONELLA,False,AICA,B
+63,What is the upper limit of normal RBC/HPF in men?,2,0.0,"NEPHRO, UROLO",PCM C129,2,50,2,6,EVALI,B
+64,What is the upper limit of normal RBC/HPF in women?,5,0.0,"NEPHRO, UROLO",PCM C129,5,5,STAPH AUREUS,HCC,TB,A
+65,What drug can cause hematuria?,CYCLOPHOSPHAMIDE,0.0,"NEPHRO, UROLO",PCM C129,CYCLOPHOSPHAMIDE,CYCLOPHOSPHAMIDE,LINEA ALBA,PULMONARY EDEMA,TAU,A
+66,What RBC/HPF threshold significantly raises the risk of cancer?,50,0.0,"NEPHRO, UROLO",PCM C129,50,FOLATE,50,BETA AMYLOID,54,B
+67,Bladder cancer's incidence is higher in women,False,0.0,"NEPHRO, UROLO",PCM C129,False,250,RO,180,False,D
+68,Bladder cancer's incidence is higher in whites (USA),1,0.0,"NEPHRO, UROLO",PCM C129,1,PERIPHERAL,MELANOMA,1,AZATHIOPRINE,C
+69,Microscopic hematuria is most commonly associated with infection and ____,BPH,0.0,"NEPHRO, UROLO",PCM C129,BPH,BPH,HCC,ASBESTOS,HYDROXYUREA,A
+70,The prevalence of serious underlying disease in asymptomatic microscopic hematuria among high-risk groups in the community [%],5,0.0,"NEPHRO, UROLO",PCM C129,5,1,ALUMINUM,5,EVALI,C
+71,Sterile pyuria can be caused by infection,1,0.0,UROLO,PCM C133-1,1,SERPINA1,1,GDM,GASTRIN,B
+72,Fungal infection in those with DM,CANDIDA,0.0,UROLO,PCM C133-1,CANDIDA,RO,CANDIDA,False,1,B
+73,Fungal infection in those taking immunosuppression,ASPERGILLUS,0.0,UROLO,PCM C133-1,ASPERGILLUS,GPA,ASPERGILLUS,VAGUS,1,B
+74,Fungal infection in those with HIV,CRYPTOCOCCUS,0.0,UROLO,PCM C133-1,CRYPTOCOCCUS,LA,MICROASPIRATION,AICA,CRYPTOCOCCUS,D
+75,Parasitic infection from contaminated water,SCHISTOSOMIASIS,0.0,UROLO,PCM C133-1,SCHISTOSOMIASIS,36,HYPOXIA,55,SCHISTOSOMIASIS,D
+76,The traditional standard threshold for bacterial infection in voided urine [CFU],100000,0.0,UROLO,PCM C133-1,100000,LONG THORACIC,100000,CANDIDA,1,B
+77,Workup for sterile pyuria with local symptoms,STD,0.0,UROLO,PCM C133-1,STD,9,UPPER,False,STD,D
+78,Workup for sterile pyuria with local symptoms,PROSTATITIS,0.0,UROLO,PCM C133-1,PROSTATITIS,PROSTATITIS,GPA,250,False,A
+79,Workup for sterile pyuria with systemic symptoms,TB,0.0,UROLO,PCM C133-1,TB,CYCLOPHOSPHAMIDE,TB,SCAPULA,C4,B
+80,What drug is associated with intraoperative floppy iris syndrome the most?,TAMSULOSIN,0.0,UROLO,PCM C138,TAMSULOSIN,DIASTASIS RECTI,CYCLOPHOSPHAMIDE,VASCULAR,TAMSULOSIN,D
+81,PDE-5i raise the risk for what malignancy?,MELANOMA,0.0,UROLO,PCM C132,MELANOMA,2.5,COPROPORPHYRIN,KLEBSIELLA,MELANOMA,D
+82,CDC's recommended dose of ceftriaxone IM for gonorrhea [mg],250,0.0,"UROLO, INFECT",PCM C125,250,1,CXR,PERIPHERAL,250,D
+83,Alternative therapy for atenolol in patient with CKD,METOPROLOL,0.0,NEPHRO,PCM C142,METOPROLOL,HINCHEY,METOPROLOL,GDM,HYDROXYUREA,B
+84,"In patient with CKD, initiate EPO when hemoglobin level drops below ____ [g/ml]",9,0.0,NEPHRO,PCM C142,9,MCI,9,NPH,MELANOMA,B
+85,____ toxicity can cause resistance to EPO,ALUMINUM,0.0,NEPHRO,PCM C142,ALUMINUM,PSYLLIUM,ALUMINUM,UPPER,HYDROXYUREA,B
+86,Hormone that raises LES pressure,GASTRIN,0.0,GASTRO,PCM C61,GASTRIN,GASTRIN,False,PCOS,RADIAL,A
+87,Patients with Barrett esophagus have similar life expectancy to general population,1,0.0,GASTRO,PCM C61,1,1,55,HYDROXYCHLOROQUINE,MICROASPIRATION,A
+88,"GERD and asthma: ""reflux"" theory is based on",MICROASPIRATION,0.0,GASTRO,PCM C61,MICROASPIRATION,MICROASPIRATION,COPD,7,PULMONARY EDEMA,A
+89,"GERD and asthma: ""reflex"" theory is based on it's activation",VAGUS,0.0,GASTRO,PCM C61,VAGUS,MCI,250,VAGUS,70,C
+90,Chronic reflux can degrage tooth ____,ENAMEL,0.0,GASTRO,PCM C61,ENAMEL,False,DIABETES,HINCHEY,ENAMEL,D
+91,GERD + Raynaud phenomenon should alert of ____,SCLERODERMA,0.0,GASTRO,PCM C61,SCLERODERMA,SCLERODERMA,VASCULAR,TACROLIMUS,NECROTIZING PNEUMONIA,A
+92,What is the most specific and sensitive test for GERD?,PH MONITORING,0.0,GASTRO,PCM C61,PH MONITORING,PH MONITORING,HCC,2.5,154,A
+93,Food restriction improves GERD symptoms,False,0.0,GASTRO,PCM C61,False,9,LA,250,False,D
+94,"After several weeks of H2RA therapy, one might develope ____",TACHYPHYLAXIS,0.0,GASTRO,PCM C61,TACHYPHYLAXIS,TB,TACHYPHYLAXIS,HYDROXYCHLOROQUINE,4,B
+95,"PPI  is associated with CAP, salmonela, campylobacter, C.difficile and ____",SBP,0.0,GASTRO,PCM C61,SBP,SERPINA1,45,SBP,BETA AMYLOID,C
+96,"PPI  is associated with ____, salmonela, campylobacter, C.difficile and SBP",CAP,0.0,GASTRO,PCM C61,CAP,B12,JAK2,V617F,CAP,D
+97,The most common hernia in women,INDIRECT INGUINAL,0.0,GASTRO,PCM C67,INDIRECT INGUINAL,CXR,45,C4,INDIRECT INGUINAL,D
+98,Incisional hernias more common in transverse than in vertical scars,False,0.0,GASTRO,PCM C67,False,MEMORY,ASBESTOS,False,EVALI,C
+99,Epigastric hernias occur through it,LINEA ALBA,0.0,GASTRO,PCM C67,LINEA ALBA,B12,SCAPULA,CAP,LINEA ALBA,D
+100,May mimic ventral hernia,DIASTASIS RECTI,0.0,GASTRO,PCM C67,DIASTASIS RECTI,AUDIOGRAM,STD,LA,DIASTASIS RECTI,D
+101,Diverticulitis staging classification,HINCHEY,0.0,GASTRO,PCM C75,HINCHEY,54,BPH,COPROPORPHYRIN,HINCHEY,D
+102,Hinchey stage 2: abscess greater than ____ cm,4,0.0,GASTRO,PCM C75,4,4,ASBESTOS,55,MEMORY,A
+103,The test of choice for diverticulitis,CT,0.0,GASTRO,PCM C75,CT,TACROLIMUS,CT,EVALI,MELANOMA,B
+104,Colonoscopy is performed ____ weeks after diverticulitis symptoms resolved,6,0.0,GASTRO,PCM C75,6,180,LINEA ALBA,CRYPTOCOCCUS,6,D
+105,Patients unable to tolerate bran may be treated with ____,PSYLLIUM,0.0,GASTRO,PCM C75,PSYLLIUM,LINEA ALBA,TACHYPHYLAXIS,PSYLLIUM,False,C
+106,Diverticulitis antibiotic treatment: ciprofloxacin + ____,METRONIDAZOLE,0.0,GASTRO,PCM C75,METRONIDAZOLE,METRONIDAZOLE,PREDIABETES,TACHYPHYLAXIS,CT,A
+107,A urine test for lead poisoning,COPROPORPHYRIN,0.0,GASTRO,PCM C58,COPROPORPHYRIN,SERPINA1,54,COPROPORPHYRIN,CXR,C
+108,Serum lead level can be normal in lead poisoning,1,0.0,GASTRO,PCM C58,1,250,1,B12,CANDIDA,B
+109,Serum level of ____ is low during acute attacks of angioneurotic edema,C4,0.0,GASTRO,PCM C58,C4,METRONIDAZOLE,DKA,C4,TB,C
+110,"Angioneurotic edema, caused by ____-esterase inhibitor deficiency",C1,0.0,GASTRO,PCM C58,C1,SCAPULA,B12,C1,False,C
+111,Life expectancy is not affected by sickle cell trait,1,0.0,HEMATO,PCM C78,1,DKA,100000,DIASTASIS RECTI,1,D
+112,V617F mutation in PV affecting this gene,JAK2,0.0,HEMATO,PCM C80,JAK2,CXR,AUDIOGRAM,JAK2,SCAPULA,C
+113,EPO is elevated in PV,False,0.0,HEMATO,PCM C80,False,False,DIABETES,SCLERODERMA,250,A
+114,TPO is elevated in PV,False,0.0,HEMATO,PCM C80,False,CANDIDA,1,False,36,C
+115,Which vitamin levels are increased in PV?,B12,0.0,HEMATO,PCM C80,B12,INDIRECT INGUINAL,STD,False,B12,D
+116,Reactive erythrocytosis is an appropriate response to ____,HYPOXIA,0.0,HEMATO,PCM C80,HYPOXIA,PSYLLIUM,LA,TAU,HYPOXIA,D
+117,Phlebotomy is conducted to achieve Hct < ____ %,55,0.0,HEMATO,PCM C80,55,INDIRECT INGUINAL,CANDIDA,55,MELANOMA,C
+118,PV Hct target < ____ %,45,0.0,HEMATO,PCM C80,45,False,TB,45,1,C
+119,Preffered myelosuppressive therapy in PV,HYDROXYUREA,0.0,HEMATO,PCM C80,HYDROXYUREA,HYDROXYUREA,4,PERIPHERAL,UPPER,A
+120,Daily iro requirement for pregnant women [mg],2.5,0.0,HEMATO,PCM C77,2.5,LUNG ABSCESS,False,SERPINA1,2.5,D
+121,Poor responsiveness to EPO with low ____ levels,TESTOSTERONE,0.0,HEMATO,PCM C77,TESTOSTERONE,9,LA,250,TESTOSTERONE,D
+122,There is a clear relationship between mild-moderate anemia and significant symptoms,False,0.0,HEMATO,PCM C77,False,1,HINCHEY,False,DIABETES,C
+123,Phenytoin may interfere with ____ absorption,FOLATE,0.0,HEMATO,PCM C77,FOLATE,FOLATE,False,BRONCHITIS,PCOS,A
