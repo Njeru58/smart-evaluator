@@ -11,13 +11,13 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans|Rubik" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Rubik" rel="stylesheet">
-    
-   <link rel="stylesheet" href="{% static 'assets/css/main.css' %}">
-    {% block css %}
-    {% endblock css %} 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'assets/favicon/quizbank.png' %}">
 
+    <!-- Your custom CSS -->
+    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}">
+    {% block css %}
+    {% endblock css %}
 </head>
 <body class="bg-white">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
@@ -37,12 +37,9 @@
                 <h6 class="text-light mt-2 mr-2">|</h6>
                 <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:list_attempts' %}" class="text-success">Attempts</a></h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluator_ai' %}" class="text-success">EvaluatorAI</a>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluator_ai' %}" class="text-success">EvaluatorAI</a></h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluated_responses' %}" class="text-success">Evaluator Scores</a>
-                
-                
-
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluated_responses' %}" class="text-success">Evaluator Scores</a></h6>
                 
                 {% if request.user.is_superuser %}
                 <h6 class="text-light mt-2 mr-2">|</h6>
@@ -53,11 +50,11 @@
 
             </div>
         </div>
-
     </nav>
 
     {% block content %}
     {% endblock content %}
+
     <footer class="bg-light text-muted py-0">
         <div class="container py-4">
             <ul class="list-inline mb-0 text-center">
@@ -77,4 +74,3 @@
     {% block js %}{% endblock js %} 
 </body>
 </html>
-

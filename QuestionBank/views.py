@@ -335,7 +335,7 @@ def evaluated_responses(request):
     # Debugging output
     print(f"Evaluated Responses for User {request.user.username}:")
     for response in evaluated_responses:
-        print(f"ID: {response.id}, Answer: {response.answer}, Marks: {response.marks}")
+        print(f"ID: {response.id}, Answer: {response.answer}, Marks: {response.marks}, Evaluated At: {response.evaluated_at}")
     
     context = {
         'evaluated_responses': evaluated_responses

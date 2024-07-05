@@ -1,5 +1,5 @@
 {% extends 'layout/base.html' %}
-{% load static %}
+{% block title %}Evaluated Responses{% endblock title %}
 
 {% block content %}
 <div class="container my-4">
@@ -13,6 +13,7 @@
                         <th>ID</th>
                         <th>Answer</th>
                         <th>Marks</th>
+                        <th>Evaluated At</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -20,7 +21,14 @@
                         <tr>
                             <td>{{ response.id }}</td>
                             <td>{{ response.answer }}</td>
-                            <td class="text-success">{{ response.marks }}</td> <!-- Apply Bootstrap 'text-success' for green text -->
+                            <td class="text-success">{{ response.marks }}</td>
+                            <td>
+                                {% if response.evaluated_at %}
+                                    {{ response.evaluated_at|date:"DATETIME_FORMAT" }}
+                                {% else %}
+                                    Not evaluated yet
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

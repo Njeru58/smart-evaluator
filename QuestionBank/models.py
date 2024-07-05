@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser, User
 import os
 import google.generativeai as genai
 from django.conf import settings
+from django.utils import timezone
 
 class CustomUser(AbstractUser):
     user_id = models.AutoField(primary_key=True)
@@ -106,7 +107,8 @@ class StudentResponse(models.Model):
     answer = models.TextField()
     marks = models.DecimalField(default=0.0, max_digits=5, decimal_places=2)
     evaluated = models.BooleanField(default=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Update this field
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    evaluated_at = models.DateTimeField(blank=True, null=True)  # New field for evaluation timestamp
 
     def __str__(self):
         return f"Response for {self.ai_response.topic} - Question ID: {self.question.id}"
@@ -149,6 +151,7 @@ class StudentResponse(models.Model):
                 self.marks = 2.5
                 evaluation_message = "Average response."
 
+            self.evaluated_at = timezone.now()  # Store evaluation timestamp
             self.evaluated = True  # Mark as evaluated
             self.save()
 
