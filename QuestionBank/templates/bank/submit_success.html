@@ -1,0 +1,15 @@
+{% extends 'layout/base.html' %}
+{% block title %}Submission Success{% endblock title %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="jumbotron">
+        <h2 class="display-4 text-center text-success mb-4">Submission Successful!</h2>
+        
+        <div class="text-center mb-4">
+            <a href="{% url 'bank:evaluator_ai' %}" class="btn btn-primary btn-lg mx-2">Take Another Test</a>
+            <a href="{% url 'bank:evaluated_responses' %}" class="btn btn-success btn-lg mx-2">View Results</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

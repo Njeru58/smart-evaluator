@@ -1,37 +1,35 @@
 {% extends 'layout/base.html' %}
 {% load static %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Evaluated Responses</title>
-    <link rel="stylesheet" href="{% static 'assets/css/styles.css' %}">
-</head>
-<body>
-    <h1>Evaluated Responses</h1>
+<div class="container my-4">
+    <h1 class="text-center">Evaluated Responses</h1>
+
     {% if evaluated_responses %}
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Answer</th>
-                    <th>Marks</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for response in evaluated_responses %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
                     <tr>
-                        <td>{{ response.id }}</td>
-                        <td>{{ response.answer }}</td>
-                        <td class="marks">{{ response.marks }}</td> <!-- Apply 'marks' class for green tick -->
+                        <th>ID</th>
+                        <th>Answer</th>
+                        <th>Marks</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for response in evaluated_responses %}
+                        <tr>
+                            <td>{{ response.id }}</td>
+                            <td>{{ response.answer }}</td>
+                            <td class="text-success">{{ response.marks }}</td> <!-- Apply Bootstrap 'text-success' for green text -->
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p>No evaluated responses found for {{ request.user.username }}.</p>
+        <div class="text-center">
+            <p>No evaluated responses found for {{ request.user.username }}.</p>
+        </div>
     {% endif %}
-</body>
-</html>
+</div>
 {% endblock %}

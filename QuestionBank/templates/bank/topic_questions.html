@@ -1,29 +1,70 @@
- <!-- Load static files at the beginning of your template -->
-
 {% extends 'layout/base.html' %}
 {% load static %} 
 {% block title %}Questions for {{ ai_response.topic }}{% endblock title %}
 
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'assets/css/evaluator.css' %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 {% endblock css %}
 
 {% block content %}
-<h1>AI Response for: {{ ai_response.topic }}</h1>
+<div class="container my-4">
+    <h1 class="text-center">AI Response for: {{ ai_response.topic }}</h1>
 
-<form method="post" action="{% url 'bank:submit_answers' %}">
-    {% csrf_token %}
+    <div id="timer" class="text-center mb-4"></div> <!-- Countdown timer display -->
 
-    {% for question in ai_response.questions.all %}
-        <div class="question-container">
-            <p>{{ question.question_text }}</p>
-            <textarea name="answers[]" rows="4" cols="50"></textarea>
-            <input type="hidden" name="question_ids[]" value="{{ question.id }}">
-        </div>
-    {% endfor %}
+    <form id="question-form" method="post" action="{% url 'bank:submit_answers' %}">
+        {% csrf_token %}
 
-    <input type="hidden" name="ai_response_id" value="{{ ai_response.id }}">
-    <button type="submit">Submit Answers</button>
-</form>
+        {% for question in ai_response.questions.all %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <p class="card-text">{{ question.question_text }}</p>
+                    <textarea class="form-control" name="answers[]" rows="4" cols="50"></textarea>
+                    <input type="hidden" name="question_ids[]" value="{{ question.id }}">
+                </div>
+            </div>
+        {% endfor %}
 
+        <input type="hidden" name="ai_response_id" value="{{ ai_response.id }}">
+        <button type="submit" class="btn btn-primary">Submit Answers</button>
+    </form>
+</div>
 {% endblock content %}
+
+{% block js %}
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Set the countdown timer duration (in seconds)
+    var timerDuration = 30 * 60;
+
+    // Update the countdown timer display
+    function updateTimerDisplay(secondsRemaining) {
+        var minutes = Math.floor(secondsRemaining / 60);
+        var seconds = secondsRemaining % 60;
+        document.getElementById("timer").textContent = 
+            "Time remaining: " + minutes + "m " + (seconds < 10 ? "0" + seconds : seconds) + "s";
+    }
+
+    // Function to handle the countdown
+    function startCountdown(duration) {
+        var timer = duration;
+        var interval = setInterval(function() {
+            updateTimerDisplay(timer);
+
+            if (--timer < 0) {
+                clearInterval(interval);
+                document.getElementById("question-form").submit();
+            }
+        }, 1000);
+    }
+
+    // Start the countdown when the page loads
+    window.onload = function() {
+        startCountdown(timerDuration);
+    };
+</script>
+{% endblock js %}

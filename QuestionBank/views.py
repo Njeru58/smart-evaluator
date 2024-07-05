@@ -270,10 +270,7 @@ def upload_file(request):
         form = UploadFileForm()
     return render(request, 'bank/upload.html', {'form': form})
 
-# Evaluator ai student interface
-# def evaluator_ai(request):
-#     ai_responses = AIResponse.objects.all()
-#     return render(request, 'bank/evaluator_ai.html', {'ai_responses': ai_responses})
+
 
 
 def evaluator_ai_view(request):
@@ -315,8 +312,8 @@ def submit_answers_view(request):
                 # Optional: Print for debugging
                 print(f"Saved StudentResponse: {student_response}")
 
-            # Redirect to a success page or render a success message
-            return HttpResponse('Answers submitted successfully!')
+            # Render a success page with options to take another test or view results
+            return render(request, 'bank/submit_success.html')
 
         except AIResponse.DoesNotExist:
             return HttpResponse('AI Response does not exist.', status=404)

@@ -3,25 +3,63 @@
 {% block title %}EvaluatorAI Topics{% endblock title %}
 
 {% block content %}
-<h1>Choose a Topic to Evaluate:</h1>
+<div class="container my-4">
+    <div class="jumbotron">
+        <h2 class="display-4 text-center text-success mb-4">Welcome, {{ user.username }}!</h2>
+        <h3 class="text-center text-info mb-4">Before you start the test, here are the rules:</h3>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-info">
+                    <div class="card-body">
+                        <h4 class="card-title">Rules:</h4>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check-circle text-success"></i> Work Independently: No external help allowed.</li>
+                            <li><i class="fas fa-check-circle text-success"></i> Submit Once: Answers final upon submission.</li>
+                            <li><i class="fas fa-check-circle text-success"></i> No Plagiarism: Use your own words.</li>
+                            <li><i class="fas fa-check-circle text-success"></i> Follow Instructions: Adhere to all test guidelines.</li>
+                            <li><i class="fas fa-check-circle text-success"></i> Use Allowed Resources: Only use specified materials.</li>
+                            <li><i class="fas fa-check-circle text-success"></i> The questions are arranged topic-wise. Click on a topic to take the test.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Rules Section -->
-<div class="rules">
-    <h2>Rules:</h2>
-    <ul>
-        <li>Work Independently: No external help allowed.</li>
-        <li>Submit Once: Answers final upon submission.</li>
-        <li>No Plagiarism: Use your own words.</li>
-        <li>Follow Instructions: Adhere to all test guidelines.</li>
-        <li>Use Allowed Resources: Only use specified materials.</li>
-        <li>The questions are arranged topic-wise. Click on a topic to take the test.</li>
-    </ul>
+    <!-- Topics Section -->
+    <div class="row mt-5">
+        <div class="col-md-8 offset-md-2">
+            <h2 class="text-center mb-4">Choose one of the available Topics to proceed:</h2>
+            <div class="list-group">
+                {% for ai_response in ai_responses %}
+                    <a href="{% url 'bank:topic_questions' ai_response.id %}" class="list-group-item list-group-item-action"
+                       style="position: relative;" onmouseover="showMessage(this)" onmouseout="hideMessage(this)">
+                       {{ ai_response.topic }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
 
-<ul>
-    {% for ai_response in ai_responses %}
-        <li><a href="{% url 'bank:topic_questions' ai_response.id %}">{{ ai_response.topic }}</a></li>
-    {% endfor %}
-</ul>
+<script>
+    function showMessage(element) {
+        var messageSpan = document.createElement('span');
+        messageSpan.className = 'badge badge-primary badge-pill';
+        messageSpan.style.position = 'absolute';
+        messageSpan.style.right = '10px';
+        messageSpan.style.top = '50%';
+        messageSpan.style.transform = 'translateY(-50%)';
+        messageSpan.textContent = 'Click to view questions';
+        element.appendChild(messageSpan);
+    }
+
+    function hideMessage(element) {
+        var messageSpan = element.querySelector('.badge');
+        if (messageSpan) {
+            element.removeChild(messageSpan);
+        }
+    }
+</script>
 
 {% endblock content %}
