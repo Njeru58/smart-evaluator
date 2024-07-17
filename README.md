@@ -1,39 +1,74 @@
-# SMART_EVALUATOR
+# smart_evaluator  || QuestionBank
 
-## Admin Panel:
-- **Login:** Admins log in to access the administrative page for uploading questions.
-- **Question Management:** Ability to input questions with multiple choice options and specify correct answers.
-- **AI Integration:** Option to integrate with an AI model for dynamic question generation.
+## Description
+QuestionBank is a Django-based application designed to streamline the process of managing and evaluating multiple-choice questions for educational purposes. The system enables an admin or lecturer to upload questions, generate new questions using an integrated AI logic, and manage them efficiently.
 
-## Student Portal:
-- **Registration and Login:** Interface for students to register and log in securely.
-- **View Questions:** Access to view questions created by administrators.
+## Key Features
+- **Admin Management**: Admins can upload multiple-choice questions directly or through CSV files.
+- **AI Question Generation**: Integrated AI functionality to generate new questions automatically.
+- **Multiple User Interfaces**: Distinct interfaces for admins and students to manage tasks efficiently.
+- **Student Account Management**: Students can create accounts, log in, and view their personalized dashboard.
+- **Timed Tests**: Students can take tests within an assigned time period, ensuring a controlled testing environment.
+- **Response Evaluation**: Admins can evaluate student responses using an AI model for automated grading.
+- **Result Tracking**: Students can view their results and feedback after test submissions.
+- **Organized Data Storage**: Structured objects for managing questions, responses, attempts, and AI-generated content.
 
-## Evaluation and Grading:
-- **Admin Evaluation:** Admins can assess student responses and assign grades.
-- **Grading Logic:** Automated or manual grading of answers based on correct responses.
+## Installation
 
-## Implementation Outline:
+To set up QuestionBank locally, follow these steps:
 
-### Backend (Server-Side):
-- **Database:** Utilize PostgreSQL, MySQL, etc., with tables for admin, student, question, and answer data.
-- **Backend Framework:** Use Django or Flask for server-side logic.
-- **Entities:** Implement models for Admin, Student, Question, Answer, etc.
-- **Functionality:** Develop admin interfaces for question input and student interfaces for viewing and answering questions.
+1. **Clone the repository**
+    ```bash
+    git clone https://github.com/yourusername/QuestionBank.git
+    cd QuestionBank
+    ```
 
-### Frontend (Client-Side):
-- **Admin Interface:** Design using HTML, CSS, and JavaScript for question management and evaluation.
-- **Student Interface:** Create login/register pages and question viewing/submission interfaces.
+2. **(Optional) Create a virtual environment**
+    - It is recommended to create a virtual environment to manage dependencies.
+    ```bash
+    python -m venv myenv
+    source myenv/bin/activate   # On Windows, use `myenv\Scripts\activate`
+    ```
 
-### Deployment:
-- **Hosting:** Deploy backend on platforms like Heroku, PythonAnywhere, or AWS.
-- **Static Content:** Host frontend (HTML/CSS/JS) on GitHub Pages or similar for cost-effective deployment.
+3. **Install the required dependencies**
+    ```bash
+    pip install django
+    pip install --upgrade google-cloud-aiplatform
+    pip install google-generativeai
+    pip install pandas
+    ```
 
-### Security Considerations:
-- Implement robust authentication mechanisms.
-- Ensure data safety by validating and sanitizing user inputs.
+4. **Set up the AI key for Gemini AI**
+    - Visit [Google AI Studio](https://aistudio.google.com/app/apikey) to obtain your API key for Gemini AI.
+    - Embed the API key in your system environment:
+    ```bash
+    $env:GEMINI_API_KEY = "your API key"
+    ```
+    - Verify the key is set correctly:
+    ```bash
+    echo $env:GEMINI_API_KEY
+    ```
 
-### Integration with AI Model:
-- Depending on the AI model, integrate it into the backend for dynamic question generation.
+5. **Run the Django development server**
+    ```bash
+    python manage.py runserver
+    ```
+    - To allow access from other devices on your network:
+    ```bash
+    python manage.py runserver 0.0.0.0:8000
+    ```
+    - Share the link with students:
+    ```http
+    http://your_ip_address:8000
+    ```
 
-This setup enables admins to manage educational questions effectively while allowing students to engage with these questions and receive timely feedback from admins.
+By following these steps, you can monitor the number of students taking the test and invigilate them accordingly.
+
+## Usage
+
+### Admin Usage
+
+1. **Superuser Setup**
+   - First, create a superuser to access the Django admin interface. Run the following command in the terminal:
+   ```bash
+   python manage.py createsuperuser
