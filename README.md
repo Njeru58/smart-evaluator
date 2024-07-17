@@ -66,9 +66,38 @@ By following these steps, you can monitor the number of students taking the test
 
 ## Usage
 
-### Admin Usage
+## Admin Usage
 
-1. **Superuser Setup**
-   - First, create a superuser to access the Django admin interface. Run the following command in the terminal:
-   ```bash
-   python manage.py createsuperuser
+1. **Login to Admin Interface**
+   - Navigate to the Django admin interface at `http://localhost:8000/admin` and log in using your superuser credentials.
+
+2. **Admin Dashboard**
+   - After logging in, you will see various objects:
+     - **Question**: Upload multiple-choice questions, specifying the correct option and saving them.
+     - **CustomUser**: Manage user accounts.
+     - **Response**: View submitted answers.
+     - **Attempt**: Track student test attempts.
+     - **UploadedFile**: Upload CSV files containing questions, multiple choices, and correct answers.
+     - **EvaluatorAI**: Create instances to generate questions using AI.
+     - **AIResponse**: View generated questions organized by topic.
+     - **GeneratedQuestion**: View generated questions in a list format.
+     - **StudentResponse**: Access submitted answers for AI-generated questions for evaluation.
+
+### Student Usage
+
+1. **Account Creation**
+   - Students must create an account to access the system.
+
+2. **Login**
+   - After creating an account, students can log in to their dashboard.
+
+3. **Taking Tests**
+   - Students will find rules to guide them before taking tests. They can attempt the test within the assigned time period.
+
+4. **Viewing Results**
+   - After submission, students can view their results and any feedback provided by the evaluation system.
+
+## Contact Information
+
+For questions or support, please contact me at [rayonoxx@gmail.com](mailto:rayonoxx@gmail.com).
+
