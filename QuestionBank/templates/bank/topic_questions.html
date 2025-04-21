@@ -11,7 +11,7 @@
 <div class="container my-4">
     <h1 class="text-center">AI Response for: {{ ai_response.topic }}</h1>
 
-    <div id="timer" class="text-center mb-4"></div> <!-- Countdown timer display -->
+    <div id="timer" class="text-center mb-4"></div> <!-- Countdown Timer Display -->
 
     <form id="question-form" method="post" action="{% url 'bank:submit_answers' %}">
         {% csrf_token %}
@@ -20,7 +20,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <p class="card-text">{{ question.question_text }}</p>
-                    <textarea class="form-control" name="answers[]" rows="4" cols="50"></textarea>
+                    <textarea class="form-control" name="answers[]" rows="4" required></textarea>
                     <input type="hidden" name="question_ids[]" value="{{ question.id }}">
                 </div>
             </div>
@@ -30,41 +30,139 @@
         <button type="submit" class="btn btn-primary">Submit Answers</button>
     </form>
 </div>
-{% endblock content %}
+{% endblock %}
 
 {% block js %}
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
-    // Set the countdown timer duration (in seconds)
-    var timerDuration = 30 * 60;
+    // ✅ Get the Time Limit Dynamically from Django Context
+    var timerDuration = {{ ai_response.duration_minutes }} * 60; // Use dynamic value
+    var tabSwitchCount = 0;
+    const maxTabSwitches = 3; // Max allowed tab switches
+    let videoStream = null;
+    let snapshotInterval = 30000; // Capture snapshot every 30 sec
 
-    // Update the countdown timer display
-    function updateTimerDisplay(secondsRemaining) {
-        var minutes = Math.floor(secondsRemaining / 60);
-        var seconds = secondsRemaining % 60;
-        document.getElementById("timer").textContent = 
-            "Time remaining: " + minutes + "m " + (seconds < 10 ? "0" + seconds : seconds) + "s";
-    }
-
-    // Function to handle the countdown
+    // ✅ Start countdown timer
     function startCountdown(duration) {
         var timer = duration;
-        var interval = setInterval(function() {
+        var interval = setInterval(function () {
             updateTimerDisplay(timer);
-
             if (--timer < 0) {
                 clearInterval(interval);
+                alert("⏳ Time is up! Submitting your answers.");
                 document.getElementById("question-form").submit();
             }
         }, 1000);
     }
 
-    // Start the countdown when the page loads
+    // ✅ Update countdown display
+    function updateTimerDisplay(secondsRemaining) {
+        var minutes = Math.floor(secondsRemaining / 60);
+        var seconds = secondsRemaining % 60;
+        document.getElementById("timer").textContent =
+            "Time remaining: " + minutes + "m " + (seconds < 10 ? "0" + seconds : seconds) + "s";
+    }
+
+    // ✅ Detect tab switching
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            tabSwitchCount++;
+            alert(`⚠ Warning: You switched tabs! (${tabSwitchCount}/${maxTabSwitches})`);
+
+            // Log tab switch in the backend
+            fetch("{% url 'bank:log_tab_switch' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ tabSwitchCount: tabSwitchCount })
+            }).then(response => response.json())
+              .then(data => console.log("Tab switch logged:", data))
+              .catch(error => console.error("Error logging tab switch:", error));
+
+            // 🚨 Auto-submit if max tab switches exceeded
+            if (tabSwitchCount >= maxTabSwitches) {
+                alert("🚨 You have been disqualified due to multiple tab switches!");
+                document.getElementById("question-form").submit();
+            }
+        }
+    });
+
+    // ✅ Start Webcam for Proctoring
+    async function startWebcam() {
+        try {
+            let stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            videoStream = stream;
+            let videoElement = document.createElement("video");
+            videoElement.srcObject = stream;
+            videoElement.play();
+
+            // Capture snapshots every 30 seconds
+            setInterval(() => captureSnapshot(videoElement), snapshotInterval);
+        } catch (error) {
+            console.error("Webcam access denied or error:", error);
+        }
+    }
+
+    // ✅ Capture snapshot from webcam
+    function captureSnapshot(video) {
+        let canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        let context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+        // ✅ Show snapshot on screen
+        let img = document.createElement("img");
+        img.src = canvas.toDataURL("image/jpeg");
+        img.style.width = "200px";
+        document.body.appendChild(img); // Append image to the page
+    
+        // Send to server
+        canvas.toBlob((blob) => sendSnapshotToServer(blob), "image/jpeg");
+    }
+    
+
+    // ✅ Send snapshot to Django backend
+    function sendSnapshotToServer(blob) {
+        let formData = new FormData();
+        formData.append("snapshot", blob, "snapshot.jpg");
+        formData.append("exam_session", "{{ ai_response.topic }}");
+
+        fetch("{% url 'bank:save_snapshot' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => console.log("Snapshot uploaded:", data))
+        .catch(error => console.error("Error uploading snapshot:", error));
+    }
+
+    // ✅ CSRF Token Fetch Function
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie) {
+            document.cookie.split('; ').forEach(cookie => {
+                let [name, value] = cookie.split('=');
+                if (name === "csrftoken") {
+                    cookieValue = value;
+                }
+            });
+        }
+        return cookieValue;
+    }
+
+    // ✅ Start functionalities when page loads
     window.onload = function() {
         startCountdown(timerDuration);
+        startWebcam();
     };
 </script>
 {% endblock js %}

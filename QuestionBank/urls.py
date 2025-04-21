@@ -1,6 +1,8 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from . import views
+from .views import log_tab_switch
+from .views import save_snapshot
 app_name = 'bank'
 urlpatterns = [
     path('', views.home, name='home'),
@@ -19,5 +21,13 @@ urlpatterns = [
     path('evaluator_ai/', views.evaluator_ai_view, name='evaluator_ai'),
     path('topic_questions/<int:ai_response_id>/', views.topic_questions_view, name='topic_questions'),
     path('submit_answers/', views.submit_answers_view, name='submit_answers'),
+    path("log-tab-switch/", log_tab_switch, name="log_tab_switch"),
+    path("save_snapshot/", views.save_snapshot, name="save_snapshot"),
 
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

@@ -1,8 +1,9 @@
 from django.contrib import admin
 import os
 import google.generativeai as genai
-
-from .models import Question, CustomUser, Response, Attempt, UploadedFile, EvaluatorAI, AIResponse, StudentResponse,  GeneratedQuestion
+from django.utils.html import format_html
+from .models import Question, CustomUser, Response, Attempt, UploadedFile, EvaluatorAI, AIResponse, StudentResponse,  GeneratedQuestion, Snapshot, StudentResponse, StudentSubmission
+from django.contrib import messages
 
 admin.site.register(CustomUser, admin.ModelAdmin)
 admin.site.register(Question)
@@ -11,28 +12,34 @@ admin.site.register(Attempt)
 admin.site.register(UploadedFile)
 # admin.site.register(StudentResponse)
 # Define Inline for GeneratedQuestion
+from django.contrib import admin
+
+
 class GeneratedQuestionInline(admin.TabularInline):
     model = GeneratedQuestion
     extra = 0  # Show no extra blank forms
 
 # Register AIResponseAdmin with inlines for GeneratedQuestion
+
 @admin.register(AIResponse)
 class AIResponseAdmin(admin.ModelAdmin):
-    list_display = ('topic', 'evaluator_ai', 'get_number_of_generated_questions')
-    fields = ('evaluator_ai', 'topic')
+    list_display = ('topic', 'evaluator_ai', 'duration_minutes', 'get_number_of_generated_questions')
+    fields = ('evaluator_ai', 'topic', 'duration_minutes')
     readonly_fields = ('get_number_of_generated_questions',)
     inlines = [GeneratedQuestionInline]
 
     def get_number_of_generated_questions(self, obj):
         return obj.questions.count()
-
+ 
     get_number_of_generated_questions.short_description = "Number of Generated Questions"
+
+
 
 # Register GeneratedQuestionAdmin
 @admin.register(GeneratedQuestion)
 class GeneratedQuestionAdmin(admin.ModelAdmin):
-    list_display = ('question_text', 'ai_response')
-    list_filter = ('ai_response',)
+    list_display = ('question_text', 'ai_response', 'marks', 'category', 'created_at')
+    list_filter = ('ai_response', 'category', 'created_at')
 
     def save_model(self, request, obj, form, change):
         obj.save()
@@ -42,6 +49,7 @@ class GeneratedQuestionAdmin(admin.ModelAdmin):
         if obj is None:
             form.base_fields['ai_response'].initial = AIResponse.objects.first()
         return form
+
 
 # Register EvaluatorAIAdmin with custom action
 @admin.register(EvaluatorAI)
@@ -142,9 +150,54 @@ class EvaluatedResponseInline(admin.TabularInline):
 
     evaluate_response.short_description = "Evaluation"
 
+# class StudentResponseAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'answer', 'marks', 'evaluated')
+#     actions = ['evaluate_responses']  # Register the custom action here
+
+#     def evaluate_responses(self, request, queryset):
+#         response_data = []
+
+#         try:
+#             # Retrieve API key from environment variables
+#             api_key = os.environ.get("GEMINI_API_KEY")
+#             if not api_key:
+#                 return self.message_user(request, "GEMINI_API_KEY environment variable not set.", level='ERROR')
+
+#             # Configure the AI generation library
+#             genai.configure(api_key=api_key)
+
+#             for student_response in queryset:
+#                 evaluation_message = student_response.evaluate()
+
+#                 response_data.append({
+#                     'response_id': student_response.id,
+#                     'evaluation_message': evaluation_message,
+#                     'marks': student_response.marks,
+#                     'evaluated': student_response.evaluated
+#                 })
+
+#             self.message_user(request, "Responses evaluated successfully.", level='SUCCESS')
+
+#         except Exception as e:
+#             self.message_user(request, f"An error occurred during evaluation: {e}", level='ERROR')
+
+#         # Optionally, return JSON response data
+#         # return JsonResponse(response_data, safe=False)
+
+#     evaluate_responses.short_description = "Evaluate Responses"
+
+# # Register the StudentResponseAdmin with the StudentResponse model
+class StudentSubmissionInline(admin.TabularInline):
+    model = StudentSubmission
+    extra = 0  # No extra empty forms
+    readonly_fields = ("evaluated", "marks", "evaluated_at")  # Read-only fields
+
 class StudentResponseAdmin(admin.ModelAdmin):
-    list_display = ('id', 'answer', 'marks', 'evaluated')
-    actions = ['evaluate_responses']  # Register the custom action here
+    list_display = ("id", "student", "ai_response", "created_at", "total_marks", "evaluated")
+    list_filter = ("evaluated", "created_at")
+    search_fields = ("student__username", "ai_response__id")
+    inlines = [StudentSubmissionInline]  # Enables inline viewing of submitted answers
+    actions = ["evaluate_responses"]  # Bulk evaluation action
 
     def evaluate_responses(self, request, queryset):
         response_data = []
@@ -153,30 +206,86 @@ class StudentResponseAdmin(admin.ModelAdmin):
             # Retrieve API key from environment variables
             api_key = os.environ.get("GEMINI_API_KEY")
             if not api_key:
-                return self.message_user(request, "GEMINI_API_KEY environment variable not set.", level='ERROR')
+                self.message_user(request, "GEMINI_API_KEY environment variable not set.", level=messages.ERROR)
+                return
 
-            # Configure the AI generation library
+            # Configure the AI model
             genai.configure(api_key=api_key)
 
             for student_response in queryset:
-                evaluation_message = student_response.evaluate()
+                for submission in student_response.submissions.all():
+                    evaluation_message = submission.evaluate()  # Calls the AI evaluation function
+                    response_data.append({
+                        'response_id': submission.id,
+                        'evaluation_message': evaluation_message,
+                        'marks': submission.marks,
+                        'evaluated': submission.evaluated
+                    })
 
-                response_data.append({
-                    'response_id': student_response.id,
-                    'evaluation_message': evaluation_message,
-                    'marks': student_response.marks,
-                    'evaluated': student_response.evaluated
-                })
+                student_response.evaluated = True  # Mark the whole response as evaluated
+                student_response.save()
 
-            self.message_user(request, "Responses evaluated successfully.", level='SUCCESS')
+            self.message_user(request, "Selected responses have been evaluated successfully.", level=messages.SUCCESS)
 
         except Exception as e:
-            self.message_user(request, f"An error occurred during evaluation: {e}", level='ERROR')
+            self.message_user(request, f"An error occurred during evaluation: {e}", level=messages.ERROR)
 
-        # Optionally, return JSON response data
-        # return JsonResponse(response_data, safe=False)
+    evaluate_responses.short_description = "Evaluate Selected Responses"
 
-    evaluate_responses.short_description = "Evaluate Responses"
-
-# Register the StudentResponseAdmin with the StudentResponse model
 admin.site.register(StudentResponse, StudentResponseAdmin)
+
+# class StudentResponseAdmin(admin.ModelAdmin):
+#     list_display = ('id', 'student', 'created_at', 'total_marks', 'evaluated')
+#     inlines = [StudentSubmissionInline]  # Show submissions inside response admin
+#     actions = ['evaluate_responses']
+
+#     def evaluated(self, obj):
+#         return all(sub.evaluated for sub in obj.submissions.all())
+#     evaluated.boolean = True  # Show as a checkmark in admin
+
+#     def evaluate_responses(self, request, queryset):
+#         response_data = []
+
+#         try:
+#             # Retrieve API key from environment variables
+#             api_key = os.environ.get("GEMINI_API_KEY")
+#             if not api_key:
+#                 self.message_user(request, "GEMINI_API_KEY environment variable not set.", level='ERROR')
+#                 return
+
+#             # Configure the AI generation library
+#             genai.configure(api_key=api_key)
+
+#             for student_response in queryset:
+#                 for submission in student_response.submissions.all():
+#                     evaluation_message = submission.evaluate()
+
+#                     response_data.append({
+#                         'response_id': submission.id,
+#                         'evaluation_message': evaluation_message,
+#                         'marks': submission.marks,
+#                         'evaluated': submission.evaluated
+#                     })
+
+#             self.message_user(request, "Responses evaluated successfully.", level='SUCCESS')
+
+#         except Exception as e:
+#             self.message_user(request, f"An error occurred during evaluation: {e}", level='ERROR')
+
+#     evaluate_responses.short_description = "Evaluate All Responses"
+
+# admin.site.register(StudentResponse, StudentResponseAdmin)
+
+
+class SnapshotAdmin(admin.ModelAdmin):
+    list_display = ('user', 'exam_session', 'timestamp', 'image_preview')  # Columns in admin list view
+    readonly_fields = ('image_preview',)  # Prevent accidental edits
+
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="150px" style="border-radius: 5px;" />', obj.image.url)
+        return "(No Image)"
+
+    image_preview.short_description = "Snapshot"
+
+admin.site.register(Snapshot, SnapshotAdmin)

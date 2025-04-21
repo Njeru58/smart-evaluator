@@ -1,5 +1,6 @@
 import random
 
+import json
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -10,8 +11,19 @@ import pandas as pd
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from .forms import UserLoginForm, RegistrationForm, UploadFileForm
-from .models import Question, Response, Attempt, UploadedFile, AIResponse, StudentResponse,GeneratedQuestion
+from .models import Question, Response, Attempt, UploadedFile, AIResponse, StudentResponse,GeneratedQuestion, StudentSubmission
 from django.http import HttpResponse
+
+import base64
+from django.core.files.base import ContentFile
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from datetime import datetime
+from .models import Snapshot
+
 
 from .constants import *
 
@@ -279,65 +291,108 @@ def evaluator_ai_view(request):
     return render(request, 'bank/evaluator_ai.html', context)
 
 def topic_questions_view(request, ai_response_id):
-    ai_response = AIResponse.objects.get(id=ai_response_id)
-    context = {'ai_response': ai_response}
+    """
+    View for displaying an exam with dynamically set time limits.
+    """
+    ai_response = get_object_or_404(AIResponse, id=ai_response_id)
+    
+    context = {
+        'ai_response': ai_response,
+        'time_limit': ai_response.time_limit  # ✅ Pass time limit to template
+    }
     return render(request, 'bank/topic_questions.html', context)
 
 @login_required
 def submit_answers_view(request):
+    """
+    Handles submission of student responses.
+    """
     if request.method == 'POST':
         try:
             ai_response_id = request.POST.get('ai_response_id')
-            ai_response = AIResponse.objects.get(pk=ai_response_id)
+            ai_response = get_object_or_404(AIResponse, pk=ai_response_id)
 
-            # Retrieve answers and question IDs
             answers = request.POST.getlist('answers[]')
             question_ids = request.POST.getlist('question_ids[]')
-
-            # Get the current logged-in user
             user = request.user
 
-            # Process each answer and save it as a StudentResponse
-            for answer, question_id in zip(answers, question_ids):
-                question = GeneratedQuestion.objects.get(pk=question_id)
+            # ✅ Validate data integrity
+            if len(answers) != len(question_ids):
+                return HttpResponse("Mismatch between answers and questions.", status=400)
 
-                # Create a StudentResponse object for each question-answer pair
-                student_response = StudentResponse.objects.create(
-                    ai_response=ai_response,
-                    question=question,
-                    answer=answer,
-                    user=user  # Include the logged-in user
+            student_response, created = StudentResponse.objects.get_or_create(
+                student=user,
+                ai_response=ai_response
+            )
+
+            # ✅ Use bulk creation for efficiency
+            submissions = [
+                StudentSubmission(
+                    student_response=student_response,
+                    question=get_object_or_404(GeneratedQuestion, pk=qid),
+                    topic=ai_response.topic,
+                    answer=ans.strip()
                 )
+                for ans, qid in zip(answers, question_ids)
+            ]
+            StudentSubmission.objects.bulk_create(submissions)
 
-                # Optional: Print for debugging
-                print(f"Saved StudentResponse: {student_response}")
-
-            # Render a success page with options to take another test or view results
             return render(request, 'bank/submit_success.html')
-
-        except AIResponse.DoesNotExist:
-            return HttpResponse('AI Response does not exist.', status=404)
-
-        except GeneratedQuestion.DoesNotExist:
-            return HttpResponse('Generated Question does not exist.', status=404)
 
         except Exception as e:
             return HttpResponse(f'An error occurred: {str(e)}', status=500)
 
-    else:
-        return HttpResponse('Method not allowed', status=405)
+    return HttpResponse('Method not allowed', status=405)
 
 @login_required
 def evaluated_responses(request):
-    # Filter evaluated responses by the logged-in user
-    evaluated_responses = StudentResponse.objects.filter(evaluated=True, user=request.user)
-    
-    # Debugging output
-    print(f"Evaluated Responses for User {request.user.username}:")
-    for response in evaluated_responses:
-        print(f"ID: {response.id}, Answer: {response.answer}, Marks: {response.marks}, Evaluated At: {response.evaluated_at}")
-    
+    student_responses = StudentResponse.objects.filter(student=request.user, submissions__evaluated=True).distinct()
+
+    evaluated_data = []
+    for response in student_responses:
+        submissions = response.submissions.filter(evaluated=True)
+        for submission in submissions:
+            evaluated_data.append({
+                'id': submission.id,
+                'answer': submission.answer,
+                'marks': submission.marks,
+                'evaluated_at': submission.evaluated_at,
+                'topic': submission.topic,  # ← changed this
+                'max_marks': submission.question.marks,
+            })
+
     context = {
-        'evaluated_responses': evaluated_responses
+        'evaluated_responses': evaluated_data,
     }
     return render(request, 'bank/evaluator_results.html', context)
+
+
+def log_tab_switch(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        tab_switches = data.get("tabSwitchCount", 0)
+        print(f"User switched tabs {tab_switches} times.")  # Debugging: Log in terminal
+        return JsonResponse({"message": "Tab switch logged"}, status=200)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+
+@csrf_exempt
+def save_snapshot(request):
+    if request.method == "POST" and request.FILES.get("snapshot"):
+        snapshot_file = request.FILES["snapshot"]
+        exam_session = request.POST.get("exam_session", "Unknown Session")
+
+        # Assuming you want to link the snapshot to the logged-in user
+        user = request.user if request.user.is_authenticated else None
+
+        snapshot = Snapshot.objects.create(
+            user=user,
+            exam_session=exam_session,
+            image=snapshot_file
+        )
+
+        return JsonResponse({"status": "success", "snapshot_id": snapshot.id})
+    
+    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)

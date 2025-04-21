@@ -3,30 +3,49 @@
 
 {% block content %}
 <div class="container my-4">
-    <h1 class="text-center">Evaluated Responses</h1>
+    <h1 class="text-center mb-4">Your Evaluated Responses</h1>
 
     {% if evaluated_responses %}
+        <!-- Display total marks for the student -->
+        <div class="mb-4 text-end">
+            <h4>Total Score: 
+                <span class="badge bg-success">
+                    {{ total_marks }}/{{ max_possible_marks }}
+                </span>
+            </h4>
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
                     <tr>
-                        <th>ID</th>
-                        <th>Answer</th>
-                        <th>Marks</th>
+                        <th>#</th>
+                        <th>Topic</th>  <!-- Changed from Question to Topic -->
+                        <th>Your Answer</th>
+                        <th>Marks Awarded</th>
                         <th>Evaluated At</th>
+                        <th>Evaluation Summary</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for response in evaluated_responses %}
                         <tr>
-                            <td>{{ response.id }}</td>
-                            <td>{{ response.answer }}</td>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ response.topic }}</td> <!-- Use topic -->
+                            <td>{{ response.answer|truncatewords:30 }}</td>
                             <td class="text-success">{{ response.marks }}</td>
                             <td>
                                 {% if response.evaluated_at %}
-                                    {{ response.evaluated_at|date:"DATETIME_FORMAT" }}
+                                    {{ response.evaluated_at|date:"M d, Y H:i" }}
                                 {% else %}
-                                    Not evaluated yet
+                                    <span class="text-muted">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if response.evaluation_summary %}
+                                    {{ response.evaluation_summary }}
+                                {% else %}
+                                    <span class="text-muted">No summary</span>
                                 {% endif %}
                             </td>
                         </tr>
@@ -35,7 +54,7 @@
             </table>
         </div>
     {% else %}
-        <div class="text-center">
+        <div class="alert alert-info text-center">
             <p>No evaluated responses found for {{ request.user.username }}.</p>
         </div>
     {% endif %}
