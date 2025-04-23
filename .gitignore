@@ -1,0 +1,21 @@
+# Ignore common media formats
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.webp
+*.mp4
+*.avi
+*.mkv
+
+# Ignore media/snapshot folders
+media/
+snapshots/
+screenshots/
+
+# Optional: ignore VS Code backup files and system files
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
