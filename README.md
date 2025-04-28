@@ -100,4 +100,5 @@ By following these steps, you can monitor the number of students taking the test
 ## Contact Information
 
 For questions or support, please contact me at [rayonoxx@gmail.com](mailto:rayonoxx@gmail.com).
+All rights served 
 
