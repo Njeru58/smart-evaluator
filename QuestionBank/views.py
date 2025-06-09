@@ -11,8 +11,12 @@ import pandas as pd
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from .forms import UserLoginForm, RegistrationForm, UploadFileForm
-from .models import Question, Response, Attempt, UploadedFile, AIResponse, StudentResponse,GeneratedQuestion, StudentSubmission
+from .models import Question, Response, Attempt, UploadedFile, AIResponse, StudentResponse,GeneratedQuestion, StudentSubmission, VirtualExperiment, ExperimentReport
+from .models import VirtualExperiment, ExperimentQuestion, ExperimentAnswer
 from django.http import HttpResponse
+from django.contrib import messages
+
+from .forms import ExperimentReportForm
 
 import base64
 from django.core.files.base import ContentFile
@@ -22,7 +26,9 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from datetime import datetime
+from django.urls import reverse
 from .models import Snapshot
+
 
 
 from .constants import *
@@ -396,3 +402,110 @@ def save_snapshot(request):
         return JsonResponse({"status": "success", "snapshot_id": snapshot.id})
     
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+
+
+from django.views.generic import ListView, DetailView
+from .models import VirtualExperiment
+
+class ExperimentListView(ListView):
+    model = VirtualExperiment
+    template_name = 'bank/experiment_list.html'
+    context_object_name = 'experiments'
+
+class ExperimentDetailView(DetailView):
+    model = VirtualExperiment
+    template_name = 'bank/experiment_detail.html'
+    context_object_name = 'experiment'
+
+
+@login_required
+def submit_report(request, experiment_id):
+    experiment = get_object_or_404(VirtualExperiment, pk=experiment_id)
+    
+    if request.method == 'POST':
+        observation = request.POST.get('observation', '').strip()
+        data = request.POST.get('data', '').strip()
+        report_file = request.FILES.get('report_file')
+
+        if observation and data:
+            report = ExperimentReport.objects.create(
+                experiment=experiment,
+                student=request.user,
+                observation=observation,
+                data=data,
+                report_file=report_file
+            )
+            return redirect(reverse('bank:experiment_list'))
+        else:
+            error = "Please fill in both observation and data fields."
+            return render(request, 'bank/submit_report.html', {
+                'experiment': experiment,
+                'error': error,
+                'observation': observation,
+                'data': data,
+            })
+    else:
+        return render(request, 'bank/submit_report.html', {'experiment': experiment})
+    
+@login_required
+def submit_report(request, experiment_id):
+    experiment = get_object_or_404(VirtualExperiment, id=experiment_id)
+    questions = ExperimentQuestion.objects.filter(experiment=experiment)  # ✅ Fetch related questions
+
+    if request.method == 'POST':
+        form = ExperimentReportForm(request.POST, request.FILES)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.experiment = experiment
+            report.student = request.user
+            report.save()
+
+            # ✅ Handle submitted answers for experiment questions
+            for question in questions:
+                answer_key = f"question_{question.id}"
+                answer_text = request.POST.get(answer_key)
+                if answer_text:
+                    ExperimentAnswer.objects.create(  # You need to define this model
+                        report=report,
+                        question=question,
+                        answer_text=answer_text
+                    )
+
+            messages.success(request, f'Your report for "{experiment.title}" has been submitted successfully.')
+            return redirect('bank:report_submitted', experiment_id=experiment.id)
+    else:
+        form = ExperimentReportForm()
+
+    return render(request, 'bank/submit_report.html', {
+        'form': form,
+        'experiment': experiment,
+        'questions': questions  # ✅ Inject questions into template
+    })
+
+@login_required
+def report_submitted(request, experiment_id):
+    experiment = get_object_or_404(VirtualExperiment, id=experiment_id)
+
+    # Get the latest report submitted by this student for the experiment
+    report = ExperimentReport.objects.filter(experiment=experiment, student=request.user).order_by('-submitted_at').first()
+    if not report:
+        messages.error(request, "No report found for this experiment.")
+        return redirect('bank:experiment_list')
+
+    # Get all questions for the experiment
+    questions = ExperimentQuestion.objects.filter(experiment=experiment)
+
+    # Get all answers for this student related to this experiment/report
+    answer_qs = ExperimentAnswer.objects.filter(report=report)
+
+    # Build dictionary {question_id: answer_text}
+    answers = {answer.question.id: answer.answer_text for answer in answer_qs}
+
+    context = {
+        'experiment': experiment,
+        'report': report,
+        'questions': questions,
+        'answers': answers,
+    }
+
+    return render(request, 'bank/report_submitted.html', context)

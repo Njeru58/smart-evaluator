@@ -15,8 +15,9 @@
         <a href="{% url 'bank:register' %}" class="btn btn-lg btn-warning mt-1"><i class="fa fa-user-plus" aria-hidden="true"></i> Sign Up</a>
 
         {% else %}
-        <a href="{% url 'bank:generate_quiz' %}" class="btn btn-lg btn-info mt-1">Play</a>
+        <a href="{% url 'bank:generate_quiz' %}" class="btn btn-lg btn-info mt-1">Test</a>
         <a href="{% url 'bank:evaluator_ai' %}" class="btn btn-lg btn-info mt-1">EvaluatorAI</a>
+        
         {% endif %}
       </div>
     </section>

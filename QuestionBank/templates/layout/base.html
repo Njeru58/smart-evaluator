@@ -40,7 +40,9 @@
                 <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluator_ai' %}" class="text-success">EvaluatorAI</a></h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
                 <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluated_responses' %}" class="text-success">Evaluator Scores</a></h6>
-                
+                <h6 class="text-light mt-2 mr-2">|</h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:experiment_list' %}" class="text-success">Virtual Lab</a></h6>
+
                 {% if request.user.is_superuser %}
                 <h6 class="text-light mt-2 mr-2">|</h6>
                 <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:upload_file' %}" class="text-info">Upload</a></h6>

@@ -5,13 +5,13 @@ from django.utils.html import format_html
 from .models import Question, CustomUser, Response, Attempt, UploadedFile, EvaluatorAI, AIResponse, StudentResponse,  GeneratedQuestion, Snapshot, StudentResponse, StudentSubmission
 from django.contrib import messages
 
+
 admin.site.register(CustomUser, admin.ModelAdmin)
 admin.site.register(Question)
 admin.site.register(Response)
 admin.site.register(Attempt)
 admin.site.register(UploadedFile)
-# admin.site.register(StudentResponse)
-# Define Inline for GeneratedQuestion
+
 from django.contrib import admin
 
 
@@ -289,3 +289,34 @@ class SnapshotAdmin(admin.ModelAdmin):
     image_preview.short_description = "Snapshot"
 
 admin.site.register(Snapshot, SnapshotAdmin)
+
+from .models import VirtualExperiment, ExperimentImage, ExperimentReport, ExperimentQuestion, ExperimentAnswer
+
+# Existing inline for images
+class ExperimentImageInline(admin.TabularInline):
+    model = ExperimentImage
+    extra = 1
+
+# ✅ New inline for experiment questions
+class ExperimentQuestionInline(admin.TabularInline):
+    model = ExperimentQuestion
+    extra = 1
+
+@admin.register(VirtualExperiment)
+class VirtualExperimentAdmin(admin.ModelAdmin):
+    list_display = ('title', 'code')
+    search_fields = ('title', 'code')
+    list_filter = ('code',)
+    inlines = [ExperimentImageInline, ExperimentQuestionInline]  # Attach both inlines here
+
+class ExperimentAnswerInline(admin.TabularInline):
+    model = ExperimentAnswer
+    extra = 0  # No empty row unless you add manually
+    readonly_fields = ('question', 'answer_text')  # Optional: make answers view-only
+
+@admin.register(ExperimentReport)
+class ExperimentReportAdmin(admin.ModelAdmin):
+    list_display = ('experiment', 'student', 'submitted_at')
+    search_fields = ('experiment__title', 'student__username')
+    list_filter = ('submitted_at',)
+    inlines = [ExperimentAnswerInline]  

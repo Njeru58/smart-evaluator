@@ -1,0 +1,31 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Virtual Lab{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="jumbotron">
+        <h2 class="text-center text-primary">
+  Welcome <span class="text-success fs-3">{{ user.username }}</span> to the Virtual Lab
+</h2>
+
+        <p class="text-center">Explore available virtual experiments below. Click an experiment to view details, watch the video, and read the manual.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="list-group">
+                {% for experiment in experiments %}
+                    <a href="{% url 'bank:experiment_detail' experiment.id %}"
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        {{ experiment.title }}
+                        <span class="badge badge-info badge-pill">View</span>
+                    </a>
+                {% empty %}
+                    <p class="text-center">No experiments available at the moment.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

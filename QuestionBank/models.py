@@ -261,3 +261,53 @@ class Snapshot(models.Model):
     def __str__(self):
         return f"Snapshot of {self.user} - {self.exam_session} ({self.timestamp})"
 
+class VirtualExperiment(models.Model):
+    title = models.CharField(max_length=200)
+    code = models.CharField(max_length=50)
+    video = models.FileField(upload_to='experiment_videos/')
+    manual = models.FileField(upload_to='experiment_manuals/')
+    description = models.TextField(blank=True)
+
+    # Optional toggles
+    requires_report = models.BooleanField(default=True)
+    requires_questions = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+
+
+class ExperimentImage(models.Model):
+    experiment = models.ForeignKey(VirtualExperiment, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='experiment_images/')
+
+    def __str__(self):
+        return f"Image for {self.experiment.title}"
+
+class ExperimentReport(models.Model):
+    experiment = models.ForeignKey(VirtualExperiment, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    observation = models.TextField()
+    data = models.TextField()
+    report_file = models.FileField(upload_to='experiment_reports/', blank=True, null=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.experiment.title} - {self.student.username}"
+
+
+class ExperimentQuestion(models.Model):
+    experiment = models.ForeignKey(VirtualExperiment, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.TextField()
+    marks = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"Q: {self.question_text[:50]}"
+    
+class ExperimentAnswer(models.Model):
+    report = models.ForeignKey(ExperimentReport, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey(ExperimentQuestion, on_delete=models.CASCADE)
+    answer_text = models.TextField()
+
+    def __str__(self):
+        return f"Answer by {self.report.student.username} to: {self.question.question_text[:30]}"
+

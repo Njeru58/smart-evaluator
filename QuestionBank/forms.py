@@ -45,3 +45,22 @@ class RegistrationForm(UserCreationForm):
 class UploadFileForm(forms.Form):
     file = forms.FileField()
 
+
+from django import forms
+from .models import ExperimentReport
+
+class ExperimentReportForm(forms.ModelForm):
+    class Meta:
+        model = ExperimentReport
+        fields = ['observation', 'data', 'report_file']
+        widgets = {
+            'observation': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'data': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'report_file': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'observation': 'Observation',
+            'data': 'Data Collected',
+            'report_file': 'Attach Report File (optional)',
+        }
+

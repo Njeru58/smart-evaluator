@@ -1,0 +1,107 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Submit Report - {{ experiment.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h3 class="card-title text-success mb-4">Submit Your Report for "{{ experiment.title }}"</h3>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {# ----------------- EXPERIMENT QUESTIONS SECTION ----------------- #}
+                        {% if questions %}
+                        <div class="mb-4">
+                            <h5 class="text-primary">Experiment Questions</h5>
+                            {% for question in questions %}
+                                <div class="form-group">
+                                    <label for="question_{{ question.id }}">
+                                        <strong>Q{{ forloop.counter }}:</strong> {{ question.question_text }}
+                                        <span class="text-muted ml-2">[{{ question.marks }} marks]</span>
+                                    </label>
+                                    <textarea name="question_{{ question.id }}" id="question_{{ question.id }}" class="form-control" rows="3" required></textarea>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        {# ------------------ REPORT SUBMISSION SECTION ------------------ #}
+                        <div class="form-group">
+                            <label for="id_observation">Observations</label>
+                            <textarea name="observation" id="id_observation" class="form-control" rows="5" placeholder="Write your observations here..." required>{{ form.observation.value }}</textarea>
+                            {% if form.observation.errors %}
+                                <small class="text-danger">{{ form.observation.errors }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_data">Experimental Data</label>
+                            <textarea name="data" id="id_data" class="form-control" rows="5" placeholder="Include measured values or descriptions..." required>{{ form.data.value }}</textarea>
+                            {% if form.data.errors %}
+                                <small class="text-danger">{{ form.data.errors }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_report_file">Attach Full Report (optional)</label>
+                            <input type="file" name="report_file" id="id_report_file" class="form-control-file">
+                            {% if form.report_file.errors %}
+                                <small class="text-danger">{{ form.report_file.errors }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane mr-2"></i>Submit Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Webcam Overlay #}
+    <div id="webcam-overlay">
+        <video id="studentCam" autoplay muted playsinline></video>
+    </div>
+
+    <style>
+        #webcam-overlay {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 150px;
+            z-index: 9999;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #000;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        #webcam-overlay video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+
+    <script>
+        const video = document.getElementById('studentCam');
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Webcam access error:', error);
+                document.getElementById('webcam-overlay').innerHTML = "<p class='text-danger p-2'>Webcam access blocked</p>";
+            });
+    </script>
+</div>
+{% endblock %}

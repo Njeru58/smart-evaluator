@@ -23,6 +23,10 @@ urlpatterns = [
     path('submit_answers/', views.submit_answers_view, name='submit_answers'),
     path("log-tab-switch/", log_tab_switch, name="log_tab_switch"),
     path("save_snapshot/", views.save_snapshot, name="save_snapshot"),
+    path('experiment_list/', views.ExperimentListView.as_view(), name='experiment_list'),
+    path('<int:pk>/', views.ExperimentDetailView.as_view(), name='experiment_detail'),
+    path('experiment/<int:experiment_id>/submit_report/', views.submit_report, name='submit_report'),
+    path('report_submitted/<int:experiment_id>/', views.report_submitted, name='report_submitted'),
 
 ]
 
@@ -30,4 +34,5 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
