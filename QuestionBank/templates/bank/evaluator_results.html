@@ -1,61 +1,80 @@
 {% extends 'layout/base.html' %}
-{% block title %}Evaluated Responses{% endblock title %}
+{% block title %}Question Bank | Evaluated Answers{% endblock title %}
 
 {% block content %}
-<div class="container my-4">
-    <h1 class="text-center mb-4">Your Evaluated Responses</h1>
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">My Evaluated & Pending Responses</h2>
 
-    {% if evaluated_responses %}
-        <!-- Display total marks for the student -->
-        <div class="mb-4 text-end">
-            <h4>Total Score: 
-                <span class="badge bg-success">
-                    {{ total_marks }}/{{ max_possible_marks }}
-                </span>
-            </h4>
-        </div>
+    {% if grouped_responses %}
+        <ul class="list-group">
+            {% for topic, responses in grouped_responses.items %}
+                <li class="list-group-item">
+                    <!-- Topic Header -->
+                    <a class="d-flex justify-content-between align-items-center"
+                       data-toggle="collapse"
+                       href="#collapseTopic{{ forloop.counter }}"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="collapseTopic{{ forloop.counter }}">
+                        <div>
+                            <strong>{{ topic }}</strong><br>
+                            <small class="text-muted">{{ responses|length }} submission{{ responses|length|pluralize }}</small>
+                        </div>
+                        <span class="text-primary">View</span>
+                    </a>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Topic</th>  <!-- Changed from Question to Topic -->
-                        <th>Your Answer</th>
-                        <th>Marks Awarded</th>
-                        <th>Evaluated At</th>
-                        <th>Evaluation Summary</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for response in evaluated_responses %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ response.topic }}</td> <!-- Use topic -->
-                            <td>{{ response.answer|truncatewords:30 }}</td>
-                            <td class="text-success">{{ response.marks }}</td>
-                            <td>
-                                {% if response.evaluated_at %}
-                                    {{ response.evaluated_at|date:"M d, Y H:i" }}
-                                {% else %}
-                                    <span class="text-muted">Pending</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if response.evaluation_summary %}
-                                    {{ response.evaluation_summary }}
-                                {% else %}
-                                    <span class="text-muted">No summary</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    <!-- Responses List -->
+                    <div class="collapse mt-3" id="collapseTopic{{ forloop.counter }}">
+                        <ul class="list-group">
+                            {% for response in responses %}
+                                <li class="list-group-item">
+                                    <p class="mb-1"><strong>Answer:</strong> {{ response.answer|truncatewords:25 }}</p>
+                                    <p class="mb-1">
+                                        <strong>Status:</strong>
+                                        {% if response.evaluated %}
+                                            <span class="text-success">Evaluated</span> |
+                                            <strong>Marks:</strong> {{ response.marks }}/{{ response.question.marks }} |
+                                            <small class="text-muted">{{ response.evaluated_at|date:"M d, Y @ H:i" }}</small>
+                                        {% else %}
+                                            <span class="text-danger">Pending Evaluation</span>
+                                        {% endif %}
+                                    </p>
+
+                                    {% if response.evaluated and response.evaluation_feedback %}
+                                        <p>
+                                            <a class="btn btn-sm btn-outline-secondary"
+                                               data-toggle="collapse"
+                                               href="#feedback{{ response.id }}"
+                                               role="button"
+                                               aria-expanded="false"
+                                               aria-controls="feedback{{ response.id }}">
+                                                Show Feedback
+                                            </a>
+                                        </p>
+                                        <div class="collapse" id="feedback{{ response.id }}">
+                                            <div class="card card-body small">
+                                                <pre class="mb-0">{{ response.evaluation_feedback }}</pre>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Total Score -->
+        <div class="mt-4 text-right">
+            <strong>Total Score:</strong>
+            <span class="badge badge-success p-2">
+                {{ total_marks }}/{{ max_possible_marks }}
+            </span>
         </div>
     {% else %}
         <div class="alert alert-info text-center">
-            <p>No evaluated responses found for {{ request.user.username }}.</p>
+            No evaluated or pending responses found for <strong>{{ request.user.username }}</strong>.
         </div>
     {% endif %}
 </div>

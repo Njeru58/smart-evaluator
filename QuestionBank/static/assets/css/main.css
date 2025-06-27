@@ -27,3 +27,23 @@ button:hover {
   padding: 20px;
   border-radius: 5px;
 }
+/* Glow effect for active tab */
+.active-tab {
+    color: #00ffcc !important;
+    font-weight: bold;
+    text-shadow: 0 0 8px #00ffcc;
+}
+.nav-link {
+    transition: all 0.3s ease-in-out;
+}
+.nav-link:hover {
+    text-shadow: 0 0 5px #5bc0de;
+    color: #5bc0de !important;
+}
+.wiggle-pulse {
+    animation: wigglePulse 1.2s ease-in-out infinite alternate;
+}
+.navbar-toggler {
+    padding: 0.6rem 0.9rem;
+}
+

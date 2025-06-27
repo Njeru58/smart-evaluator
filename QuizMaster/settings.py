@@ -32,7 +32,9 @@ ALLOWED_HOSTS =['*']
 # Application definition
 
 INSTALLED_APPS = [
-    # 'jazzmin',
+    'jazzmin',
+    'sorl.thumbnail',
+    'QuestionBank',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'QuestionBank',
+    
+    
 ]
 
 
@@ -141,5 +144,40 @@ AUTH_USER_MODEL = 'QuestionBank.CustomUser'
 
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/user_home'
+
+JAZZMIN_SETTINGS = {
+    "site_title": "LECTURER INTERFACE",
+    "site_header": "Lecturer Admin Panel",
+    "site_brand": "Question Bank",
+    "welcome_sign": "Welcome, Lecturer! Ready to Manage Smart Exams?",
+    "copyright": "Question Bank. || Noxx Dev😎",
+
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"app": "QuestionBank"},
+    ],
+
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "QuestionBank.VirtualExperiment": "fas fa-flask",
+        "QuestionBank.ApparatusItem": "fas fa-tools",
+        "QuestionBank.TheoryImage": "fas fa-image",
+        "QuestionBank.ExperimentStep": "fas fa-stream",
+        "QuestionBank.ExperimentQuestion": "fas fa-question-circle",
+        "QuestionBank.ExperimentReport": "fas fa-file-alt",
+        "QuestionBank.ExperimentAnswer": "fas fa-reply",
+    },
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+
+    "theme": "cyborg",
+
+    # Leave this section out to use default Django admin forms
+    # "changeform_format": "horizontal_tabs",
+    # "changeform_format_overrides": {
+    #     "QuestionBank.VirtualExperiment": "horizontal_tabs",
+    # }
+}
 
 

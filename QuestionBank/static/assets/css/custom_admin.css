@@ -1,0 +1,8 @@
+/* Custom CSS to ensure inline tabs open on one click */
+.inline-group .tabular.inline-related {
+    display: block !important;
+}
+
+.inline-group .tabular.inline-related .inline-related {
+    display: table-row-group !important;
+}

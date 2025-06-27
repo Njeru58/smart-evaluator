@@ -21,6 +21,7 @@ import threading
 from typing import Any, Generator, Generic, List, Optional, TypeVar
 
 from grpc._cython import cygrpc as _cygrpc
+from grpc._typing import ChannelArgumentType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +37,20 @@ _SERVICES_TO_EXCLUDE: List[bytes] = [
 ]
 
 
+class ServerCallTracerFactory:
+    """An encapsulation of a ServerCallTracerFactory.
+
+    Instances of this class can be passed to a Channel as values for the
+    grpc.experimental.server_call_tracer_factory option
+    """
+
+    def __init__(self, address):
+        self._address = address
+
+    def __int__(self):
+        return self._address
+
+
 class ObservabilityPlugin(
     Generic[ClientCallTracerCapsule, ServerCallTracerFactoryCapsule],
     metaclass=abc.ABCMeta,
@@ -46,7 +61,7 @@ class ObservabilityPlugin(
      the gRPC team.*
 
     The ClientCallTracerCapsule and ClientCallTracerCapsule created by this
-    plugin should be inject to gRPC core using observability_init at the
+    plugin should be injected to gRPC core using observability_init at the
     start of a program, before any channels/servers are built.
 
     Any future methods added to this interface cannot have the
@@ -78,27 +93,10 @@ class ObservabilityPlugin(
         Args:
           method_name: The method name of the call in byte format.
           target: The channel target of the call in byte format.
-          registered_method: Wether this method is pre-registered.
+          registered_method: Whether this method is pre-registered.
 
         Returns:
           A PyCapsule which stores a ClientCallTracer object.
-        """
-        raise NotImplementedError()
-
-    @abc.abstractmethod
-    def delete_client_call_tracer(
-        self, client_call_tracer: ClientCallTracerCapsule
-    ) -> None:
-        """Deletes the ClientCallTracer stored in ClientCallTracerCapsule.
-
-        After register the plugin, if tracing or stats is enabled, this method
-        will be called at the end of the call to destroy the ClientCallTracer.
-
-        The ClientCallTracer is an object which implements `grpc_core::ClientCallTracer`
-        interface and wrapped in a PyCapsule using `client_call_tracer` as name.
-
-        Args:
-          client_call_tracer: A PyCapsule which stores a ClientCallTracer object.
         """
         raise NotImplementedError()
 
@@ -126,19 +124,23 @@ class ObservabilityPlugin(
     @abc.abstractmethod
     def create_server_call_tracer_factory(
         self,
-    ) -> ServerCallTracerFactoryCapsule:
+        *,
+        xds: bool = False,
+    ) -> Optional[ServerCallTracerFactoryCapsule]:
         """Creates a ServerCallTracerFactoryCapsule.
 
-        After register the plugin, if tracing or stats is enabled, this method
-        will be called by calling observability_init, the ServerCallTracerFactory
-        created by this method will be registered to gRPC core.
+        This method will be called at server initialization time to create a
+        ServerCallTracerFactory, which will be registered to gRPC core.
 
         The ServerCallTracerFactory is an object which implements
         `grpc_core::ServerCallTracerFactory` interface and wrapped in a PyCapsule
         using `server_call_tracer_factory` as name.
 
+        Args:
+          xds: Whether the server is xds server.
         Returns:
-          A PyCapsule which stores a ServerCallTracerFactory object.
+          A PyCapsule which stores a ServerCallTracerFactory object. Or None if
+        plugin decides not to create ServerCallTracerFactory.
         """
         raise NotImplementedError()
 
@@ -221,7 +223,7 @@ def set_plugin(observability_plugin: Optional[ObservabilityPlugin]) -> None:
 
     Raises:
       ValueError: If an ObservabilityPlugin was already registered at the
-        time of calling this method.
+    time of calling this method.
     """
     global _OBSERVABILITY_PLUGIN  # pylint: disable=global-statement
     with _plugin_lock:
@@ -241,13 +243,9 @@ def observability_init(observability_plugin: ObservabilityPlugin) -> None:
 
     Raises:
       ValueError: If an ObservabilityPlugin was already registered at the
-        time of calling this method.
+    time of calling this method.
     """
     set_plugin(observability_plugin)
-    try:
-        _cygrpc.set_server_call_tracer_factory(observability_plugin)
-    except Exception:  # pylint:disable=broad-except
-        _LOGGER.exception("Failed to set server call tracer factory!")
 
 
 def observability_deinit() -> None:
@@ -261,22 +259,6 @@ def observability_deinit() -> None:
     _cygrpc.clear_server_call_tracer_factory()
 
 
-def delete_call_tracer(client_call_tracer_capsule: Any) -> None:
-    """Deletes the ClientCallTracer stored in ClientCallTracerCapsule.
-
-    This method will be called at the end of the call to destroy the ClientCallTracer.
-
-    The ClientCallTracer is an object which implements `grpc_core::ClientCallTracer`
-    interface and wrapped in a PyCapsule using `client_call_tracer` as the name.
-
-    Args:
-      client_call_tracer_capsule: A PyCapsule which stores a ClientCallTracer object.
-    """
-    with get_plugin() as plugin:
-        if plugin and plugin.observability_enabled:
-            plugin.delete_client_call_tracer(client_call_tracer_capsule)
-
-
 def maybe_record_rpc_latency(state: "_channel._RPCState") -> None:
     """Record the latency of the RPC, if the plugin is registered and stats is enabled.
 
@@ -284,17 +266,34 @@ def maybe_record_rpc_latency(state: "_channel._RPCState") -> None:
 
     Args:
       state: a grpc._channel._RPCState object which contains the stats related to the
-        RPC.
+    RPC.
     """
     # TODO(xuanwn): use channel args to exclude those metrics.
     for exclude_prefix in _SERVICES_TO_EXCLUDE:
         if exclude_prefix in state.method.encode("utf8"):
             return
     with get_plugin() as plugin:
-        if not (plugin and plugin.stats_enabled):
-            return
-        rpc_latency_s = state.rpc_end_time - state.rpc_start_time
-        rpc_latency_ms = rpc_latency_s * 1000
-        plugin.record_rpc_latency(
-            state.method, state.target, rpc_latency_ms, state.code
-        )
+        if plugin and plugin.stats_enabled:
+            rpc_latency_s = state.rpc_end_time - state.rpc_start_time
+            rpc_latency_ms = rpc_latency_s * 1000
+            plugin.record_rpc_latency(
+                state.method, state.target, rpc_latency_ms, state.code
+            )
+
+
+def create_server_call_tracer_factory_option(xds: bool) -> ChannelArgumentType:
+    with get_plugin() as plugin:
+        if plugin and plugin.stats_enabled:
+            server_call_tracer_factory_address = (
+                _cygrpc.get_server_call_tracer_factory_address(plugin, xds)
+            )
+            if server_call_tracer_factory_address:
+                return (
+                    (
+                        "grpc.experimental.server_call_tracer_factory",
+                        ServerCallTracerFactory(
+                            server_call_tracer_factory_address
+                        ),
+                    ),
+                )
+        return ()

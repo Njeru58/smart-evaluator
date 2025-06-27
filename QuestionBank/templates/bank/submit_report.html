@@ -1,4 +1,6 @@
 {% extends 'layout/base.html' %}
+{% load static %}
+{% load custom_filters %}
 
 {% block title %}Submit Report - {{ experiment.title }}{% endblock %}
 
@@ -8,100 +10,182 @@
         <div class="col-md-10">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h3 class="card-title text-success mb-4">Submit Your Report for "{{ experiment.title }}"</h3>
+                    <h3 class="card-title text-success mb-4">
+                        Submit Your Report for "{{ experiment.title }}"
+                    </h3>
+
+                    {% if draft_loaded %}
+                        <div class="alert alert-info">
+                            Draft loaded successfully. You can now complete and submit your report.
+                        </div>
+                    {% endif %}
+
+                    {% if submitted %}
+                        <div class="alert alert-success">
+                            <strong>Your Draft have been saved and can  be previewed!!</strong><br>
+                            Submitted by <strong>{{ report.student.get_full_name|default:report.student.username }}</strong>
+                            on <strong>{{ report.submitted_at|date:"F d, Y @ h:i A" }}</strong>.
+                        </div>
+                    {% endif %}
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
 
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
-                        {# ----------------- EXPERIMENT QUESTIONS SECTION ----------------- #}
-                        {% if questions %}
+                        {# --- Lab Report Sections --- #}
                         <div class="mb-4">
-                            <h5 class="text-primary">Experiment Questions</h5>
-                            {% for question in questions %}
+                            <h5 class="text-primary">Lab Report Sections</h5>
+
+                            {% for field in form.visible_fields %}
                                 <div class="form-group">
-                                    <label for="question_{{ question.id }}">
-                                        <strong>Q{{ forloop.counter }}:</strong> {{ question.question_text }}
-                                        <span class="text-muted ml-2">[{{ question.marks }} marks]</span>
-                                    </label>
-                                    <textarea name="question_{{ question.id }}" id="question_{{ question.id }}" class="form-control" rows="3" required></textarea>
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <small class="text-danger">{{ field.errors }}</small>
+                                    {% endif %}
                                 </div>
                             {% endfor %}
+
                         </div>
+
+                        {# --- Experiment Questions --- #}
+                        {% if questions %}
+                            <div class="mb-4">
+                                <h5 class="text-primary">Experiment Questions</h5>
+                                {% for question in questions %}
+                                    <div class="form-group">
+                                        <label for="question_{{ question.id }}">
+                                            <strong>Q{{ forloop.counter }}:</strong> {{ question.question_text }}
+                                            <span class="text-muted ml-2">[{{ question.marks }} marks]</span>
+                                        </label>
+                                        <textarea 
+                                            name="question_{{ question.id }}" 
+                                            id="question_{{ question.id }}" 
+                                            class="form-control" 
+                                            rows="3" 
+                                            required>{{ report_answers|get_item:question.id }}</textarea>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         {% endif %}
-
-                        {# ------------------ REPORT SUBMISSION SECTION ------------------ #}
-                        <div class="form-group">
-                            <label for="id_observation">Observations</label>
-                            <textarea name="observation" id="id_observation" class="form-control" rows="5" placeholder="Write your observations here..." required>{{ form.observation.value }}</textarea>
-                            {% if form.observation.errors %}
-                                <small class="text-danger">{{ form.observation.errors }}</small>
-                            {% endif %}
+                        <div class="mb-5">
+                            <h5 class="text-primary">Plot Your Graph</h5>
+                            <div class="form-row">
+                                <div class="col">
+                                    <label for="xValues">X Values (comma-separated)</label>
+                                    <input type="text" class="form-control" id="xValues" placeholder="e.g. 1,2,3,4">
+                                </div>
+                                <div class="col">
+                                    <label for="yValues">Y Values (comma-separated)</label>
+                                    <input type="text" class="form-control" id="yValues" placeholder="e.g. 5,10,15,20">
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-success mt-3" onclick="plotGraph()">
+                                <i class="fas fa-chart-line"></i> Plot Graph
+                            </button>
+                            <canvas id="reportGraph" class="mt-4" height="200"></canvas>
                         </div>
 
-                        <div class="form-group">
-                            <label for="id_data">Experimental Data</label>
-                            <textarea name="data" id="id_data" class="form-control" rows="5" placeholder="Include measured values or descriptions..." required>{{ form.data.value }}</textarea>
-                            {% if form.data.errors %}
-                                <small class="text-danger">{{ form.data.errors }}</small>
-                            {% endif %}
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" value="yes" id="confirmSubmit" required>
+                            <label class="form-check-label" for="confirmSubmit">
+                                I confirm this report is ready for submission.
+                            </label>
                         </div>
 
-                        <div class="form-group">
-                            <label for="id_report_file">Attach Full Report (optional)</label>
-                            <input type="file" name="report_file" id="id_report_file" class="form-control-file">
-                            {% if form.report_file.errors %}
-                                <small class="text-danger">{{ form.report_file.errors }}</small>
-                            {% endif %}
-                        </div>
-
-                        <div class="text-right">
+                        <div class="text-right mt-4">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane mr-2"></i>Submit Report
                             </button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
-
-    {# Webcam Overlay #}
-    <div id="webcam-overlay">
-        <video id="studentCam" autoplay muted playsinline></video>
-    </div>
-
-    <style>
-        #webcam-overlay {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 200px;
-            height: 150px;
-            z-index: 9999;
-            border: 2px solid #28a745;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #000;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        #webcam-overlay video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
-
-    <script>
-        const video = document.getElementById('studentCam');
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-            .then(stream => {
-                video.srcObject = stream;
-            })
-            .catch(error => {
-                console.error('Webcam access error:', error);
-                document.getElementById('webcam-overlay').innerHTML = "<p class='text-danger p-2'>Webcam access blocked</p>";
-            });
-    </script>
 </div>
+<script>
+    const autoSaveUrl = "{% url 'bank:auto_save_report' experiment.id %}";
+
+    // Debounce to limit frequent saves
+    function debounce(func, delay) {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    const autoSave = debounce(() => {
+        const formData = new FormData(document.querySelector('form'));
+        const jsonData = {};
+        formData.forEach((value, key) => {
+            if (!key.startsWith("question_")) {  // We'll handle questions separately if needed
+                jsonData[key] = value;
+            }
+        });
+
+        fetch(autoSaveUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(jsonData)
+        }).then(res => res.json()).then(data => {
+            console.log("Auto-saved:", data);
+        });
+    }, 1000); // 1-second delay after typing stops
+
+    // Bind auto-save to all relevant inputs
+    document.querySelectorAll('textarea, input[type="text"]').forEach(input => {
+        input.addEventListener('input', autoSave);
+    });
+
+    function plotGraph() {
+        const xVals = document.getElementById("xValues").value.split(',').map(Number);
+        const yVals = document.getElementById("yValues").value.split(',').map(Number);
+        const ctx = document.getElementById("reportGraph").getContext("2d");
+
+        if (window.reportChart) {
+            window.reportChart.destroy(); // Destroy previous chart if any
+        }
+
+        window.reportChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: xVals,
+                datasets: [{
+                    label: 'Lab Graph',
+                    data: yVals,
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'X Axis' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Y Axis' }
+                    }
+                }
+            }
+        });
+    }
+
+
+</script>
+
 {% endblock %}

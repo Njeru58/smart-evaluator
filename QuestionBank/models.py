@@ -152,13 +152,16 @@ class StudentResponse(models.Model):
 
 
 class StudentSubmission(models.Model):
-    student_response = models.ForeignKey(StudentResponse, on_delete=models.CASCADE, related_name="submissions")  
+    student_response = models.ForeignKey(
+        'StudentResponse', on_delete=models.CASCADE, related_name="submissions"
+    )
     question = models.ForeignKey('GeneratedQuestion', on_delete=models.CASCADE)
-    topic = models.CharField(max_length=255)  # Topic of the test
-    answer = models.TextField()  # The student's submitted answer
+    topic = models.CharField(max_length=255)
+    answer = models.TextField()
     marks = models.DecimalField(default=0.0, max_digits=5, decimal_places=2)
+    evaluation_feedback = models.TextField(blank=True, null=True, help_text="AI-generated feedback for this submission.")
     evaluated = models.BooleanField(default=False)
-    evaluated_at = models.DateTimeField(blank=True, null=True)  # Timestamp for evaluation
+    evaluated_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.student_response.student.username} - {self.topic} - {self.marks} Marks"
@@ -170,6 +173,7 @@ class StudentSubmission(models.Model):
                 return "GEMINI_API_KEY environment variable not set."
 
             genai.configure(api_key=api_key)
+
             generation_config = {
                 "temperature": 1,
                 "top_p": 0.95,
@@ -179,29 +183,30 @@ class StudentSubmission(models.Model):
             }
 
             model = genai.GenerativeModel(
-                model_name="gemini-1.5-pro",
+                model_name="gemini-1.5-flash",
                 generation_config=generation_config,
                 system_instruction=(
-                    "You are an exam evaluator. Assess the student's answer based on the following rubric:\n"
-                    "- Accuracy (30%)\n"
-                    "- Relevance (30%)\n"
-                    "- Completeness (20%)\n"
-                    "- Clarity (20%)\n"
-                    "Respond using keywords such as 'correct', 'relevant', 'complete', 'clear' to indicate quality."
+                "You are an exam evaluator. Read the student's answer and provide a brief, constructive evaluation in natural language. "
+                "Identify what's good, and point out what is missing, unclear, or could be improved. "
+                "Avoid scores or rubric labels. Respond in one or two sentences only."
+
                 ),
             )
 
             chat_session = model.start_chat(history=[])
 
-            # 🛡️ Pro Tip:
-            # Debugging evaluation context
-            print(f"Evaluating: {self.question.question_text[:50]}... for student {self.student_response.student.username}")
+            # ✅ Debug log for transparency
+            print(f"[Evaluating] Student: {self.student_response.student.username} | "
+                  f"Topic: {self.topic} | Question: {self.question.question_text[:60]}...")
 
             response = chat_session.send_message(self.answer)
 
-            evaluation_message, rubric_marks = self._evaluate_response(response.text)
+            evaluation_message = response.text
+            rubric_marks = self._estimate_score_from_keywords(response.text)  # optional helper if you still want to assign marks
+
 
             self.marks = rubric_marks
+            self.evaluation_feedback = evaluation_message  # ✅ Save feedback
             self.evaluated_at = timezone.now()
             self.evaluated = True
             self.save()
@@ -209,13 +214,27 @@ class StudentSubmission(models.Model):
             return evaluation_message
 
         except Exception as e:
+            print(f"[Error] Evaluation failed for {self}: {e}")
             return f"An error occurred during evaluation: {str(e)}"
 
+
+    def _estimate_score_from_keywords(self, text):
+            """
+            Estimate marks based on presence of key evaluation keywords in the Gemini feedback.
+            """
+            total = 0
+            if "correct" in text.lower():
+                total += self.question.marks * 0.3
+            if "relevant" in text.lower():
+                total += self.question.marks * 0.3
+            if "complete" in text.lower():
+                total += self.question.marks * 0.2
+            if "clear" in text.lower():
+                total += self.question.marks * 0.2
+
+            return min(total, self.question.marks)
+
     def _evaluate_response(self, response_text):
-        """
-        Uses keywords from Gemini's feedback to assign marks based on the rubric:
-        Accuracy (30%), Relevance (30%), Completeness (20%), Clarity (20%)
-        """
         accuracy_weight = self.question.marks * 0.3
         relevance_weight = self.question.marks * 0.3
         completeness_weight = self.question.marks * 0.2
@@ -227,7 +246,7 @@ class StudentSubmission(models.Model):
         clarity = self._evaluate_clarity(response_text, clarity_weight)
 
         total = accuracy + relevance + completeness + clarity
-        total = min(total, self.question.marks)  # Don't exceed the max possible
+        total = min(total, self.question.marks)
 
         message = (
             f"Evaluation:\n"
@@ -250,7 +269,7 @@ class StudentSubmission(models.Model):
 
     def _evaluate_clarity(self, text, weight):
         return weight if "clear" in text.lower() else 0
-       
+          
         
 class Snapshot(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
@@ -264,35 +283,47 @@ class Snapshot(models.Model):
 class VirtualExperiment(models.Model):
     title = models.CharField(max_length=200)
     code = models.CharField(max_length=50)
-    video = models.FileField(upload_to='experiment_videos/')
-    manual = models.FileField(upload_to='experiment_manuals/')
-    description = models.TextField(blank=True)
+    objective = models.TextField(blank=True)
+    theory = models.TextField(blank=True)
+    method_summary = models.TextField(blank=True, help_text="Optional overview of the procedure.")
+    video_url = models.URLField(blank=True, null=True)
 
-    # Optional toggles
     requires_report = models.BooleanField(default=True)
     requires_questions = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
 
+    class Meta:
+        verbose_name = "Virtual Experiment"
+        verbose_name_plural = "Virtual Experiments"
 
-class ExperimentImage(models.Model):
-    experiment = models.ForeignKey(VirtualExperiment, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='experiment_images/')
+
+class ApparatusItem(models.Model):
+    experiment = models.ForeignKey(VirtualExperiment, on_delete=models.CASCADE, related_name='apparatus_items')
+    name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='apparatus_items/')
 
     def __str__(self):
-        return f"Image for {self.experiment.title}"
+        return self.name
 
-class ExperimentReport(models.Model):
+
+class TheoryImage(models.Model):
     experiment = models.ForeignKey(VirtualExperiment, on_delete=models.CASCADE)
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    observation = models.TextField()
-    data = models.TextField()
-    report_file = models.FileField(upload_to='experiment_reports/', blank=True, null=True)
-    submitted_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to='theory_images/')
+    description = models.CharField(max_length=255, blank=True)
 
-    def __str__(self):
-        return f"{self.experiment.title} - {self.student.username}"
+
+class ExperimentStep(models.Model):
+    experiment = models.ForeignKey(VirtualExperiment, on_delete=models.CASCADE)
+    step_number = models.PositiveIntegerField()
+    instruction = models.TextField()
+    image = models.ImageField(upload_to='step_images/', blank=True, null=True)
+    video = models.FileField(upload_to='step_videos/', blank=True, null=True)
+    video_url = models.URLField(blank=True, null=True, help_text="Optional external video link (e.g., Google Drive/YouTube)")
+
+    class Meta:
+        ordering = ['step_number']
 
 
 class ExperimentQuestion(models.Model):
@@ -301,7 +332,79 @@ class ExperimentQuestion(models.Model):
     marks = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"Q: {self.question_text[:50]}"
+        return f"Question for {self.experiment.title}"
+
+class ExperimentDraft(models.Model):
+    experiment = models.ForeignKey('VirtualExperiment', on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    observation = models.TextField(blank=True, null=True)
+    data = models.TextField(blank=True, null=True)
+    image = models.ImageField(upload_to='draft_uploads/', blank=True, null=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('experiment', 'student')  # One draft per experiment per student
+
+    def __str__(self):
+        return f"Draft for {self.experiment.title} by {self.student.username}"
+    
+class ExperimentReport(models.Model):
+    experiment = models.ForeignKey('VirtualExperiment', on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    # Structured report sections
+    group_members = models.TextField("Group Members", help_text="List of group members who participated", blank=True, null=True)
+    objective = models.TextField("Objective/Aim", blank=True, null=True)
+    theory = models.TextField("Theory/Introduction", blank=True, null=True)
+    apparatus_scope = models.TextField("Apparatus/Scope", blank=True, null=True)
+    procedure = models.TextField("Procedure/Method", blank=True, null=True)
+    results = models.TextField("Results/Raw Data", blank=True, null=True)
+    data_analysis = models.TextField("Data & Error Analysis", blank=True, null=True)
+    discussion = models.TextField("Discussion", blank=True, null=True)
+    conclusion = models.TextField("Conclusion", blank=True, null=True)
+    references = models.TextField("References", blank=True, null=True)
+
+    # Pre-filled and attached
+    observation = models.TextField("Observation")
+    data = models.TextField("Data Collected")
+    report_file = models.FileField("Attach Report File", upload_to='experiment_reports/', blank=True, null=True)
+
+    # Link to draft (if any)
+    draft_used = models.OneToOneField(
+        'ExperimentDraft',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='final_report',
+        help_text="Draft that was used to submit this report, if applicable."
+    )
+
+    # ✅ Graph input fields
+    graph_x_values = models.TextField(
+        "X-Axis Values",
+        blank=True,
+        null=True,
+        help_text="Comma-separated list of X values (e.g., 1, 2, 3, 4)"
+    )
+    graph_y_values = models.TextField(
+        "Y-Axis Values",
+        blank=True,
+        null=True,
+        help_text="Comma-separated list of Y values (e.g., 10, 20, 30, 40)"
+    )
+
+    # Optional: Advanced graph storage (use only if you're using PostgreSQL)
+    # graph_data_json = JSONField(
+    #     blank=True,
+    #     null=True,
+    #     help_text="Structured JSON of graph datasets"
+    # )
+
+    submitted_at = models.DateTimeField("Submitted At", null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.experiment.title} - {self.student.username}"
+    
     
 class ExperimentAnswer(models.Model):
     report = models.ForeignKey(ExperimentReport, on_delete=models.CASCADE, related_name='answers')
@@ -311,3 +414,14 @@ class ExperimentAnswer(models.Model):
     def __str__(self):
         return f"Answer by {self.report.student.username} to: {self.question.question_text[:30]}"
 
+class ReportEvaluation(models.Model):
+    report = models.OneToOneField("ExperimentReport", on_delete=models.CASCADE, related_name="evaluation")
+    scores = models.JSONField()
+    evaluator = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
+    evaluated_at = models.DateTimeField(auto_now_add=True)
+
+    def total_score(self):
+        return sum(self.scores.values())
+
+    def __str__(self):
+        return f"Evaluation for {self.report.student} - {self.report.experiment}"

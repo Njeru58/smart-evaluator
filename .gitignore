@@ -19,3 +19,24 @@ screenshots/
 *.log
 .DS_Store
 Thumbs.db
+
+
+# Python
+*.pyc
+__pycache__/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Environment
+.env
+myenv/
+venv/
+
+# OS & IDE
+.DS_Store
+*.log
+.idea/
+.vscode/

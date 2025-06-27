@@ -52,15 +52,84 @@ from .models import ExperimentReport
 class ExperimentReportForm(forms.ModelForm):
     class Meta:
         model = ExperimentReport
-        fields = ['observation', 'data', 'report_file']
+        fields = [
+            'group_members',
+            'objective',
+            'theory',
+            'apparatus_scope',
+            'procedure',
+            'results',
+            'data_analysis',
+            'discussion',
+            'conclusion',
+            'references',
+            'observation',
+            'data',
+            'graph_x_values',
+            'graph_y_values',
+            'report_file'
+        ]
         widgets = {
+            'group_members': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'objective': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'theory': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'apparatus_scope': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'procedure': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'results': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'data_analysis': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'discussion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'conclusion': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'references': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'observation': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'data': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'graph_x_values': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'E.g. 0, 2, 4, 6, 8'
+            }),
+            'graph_y_values': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'E.g. 10, 15, 22, 28, 35'
+            }),
             'report_file': forms.FileInput(attrs={'class': 'form-control'}),
         }
         labels = {
-            'observation': 'Observation',
-            'data': 'Data Collected',
+            'group_members': 'Group Members',
+            'objective': 'Aim/Objectives of the Experiment',
+            'theory': 'Introduction / Theory',
+            'apparatus_scope': 'Apparatus Used',
+            'procedure': 'Method / Procedure',
+            'results': 'Experimental Results',
+            'data_analysis': 'Data & Error Analysis',
+            'discussion': 'Discussion',
+            'conclusion': 'Conclusion',
+            'references': 'References',
+            'observation': 'Auto-filled Observation',
+            'data': 'Auto-filled Data',
+            'graph_x_values': 'X-Axis Values (comma-separated)',
+            'graph_y_values': 'Y-Axis Values (comma-separated)',
             'report_file': 'Attach Report File (optional)',
         }
 
+
+from django import forms
+from .models import ExperimentDraft
+
+class ExperimentDraftForm(forms.ModelForm):
+    class Meta:
+        model = ExperimentDraft
+        fields = ['observation', 'data', 'image']
+        widgets = {
+            'observation': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Write your observations here...'
+            }),
+            'data': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Record your data points or values here...'
+            }),
+            'image': forms.ClearableFileInput(attrs={
+                'class': 'form-control'
+            })
+        }

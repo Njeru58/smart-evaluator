@@ -1,97 +1,228 @@
 {% extends 'layout/base.html' %}
-
+{% load thumbnail %}
 {% block title %}{{ experiment.title }} - Virtual Lab{% endblock %}
 
 {% block content %}
 <div class="container my-5">
     <div class="card shadow-lg">
         <div class="card-body">
-            <h2 class="card-title text-primary mb-3">{{ experiment.title }}</h2>
-            <p class="card-text text-muted">{{ experiment.description }}</p>
 
-            <div class="row">
-                <!-- Left Column: Manual, Video, Image -->
-                <div class="col-md-8">
-                    <!-- Manual -->
-                    <div class="mb-4">
-                        <h5 class="text-info">Manual</h5>
-                        <a href="{{ experiment.manual.url }}" target="_blank" class="btn btn-outline-info">
-                            <i class="fas fa-file-download mr-2"></i>Download / View Manual
-                        </a>
-                    </div>
+            <!-- Title & Code -->
+            <h2 class="card-title text-primary mb-1">{{ experiment.title }}</h2>
+            <p class="text-muted mb-4"><strong>Code:</strong> {{ experiment.code }}</p>
 
-                    <!-- Video -->
-                    <div class="mb-4">
-                        <h5 class="text-info">Video Demonstration</h5>
-                        <video class="w-100 rounded border" controls>
-                            <source src="{{ experiment.video.url }}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+            <!-- Objective -->
+            <div class="mb-5">
+                <h5 class="text-info">Objective</h5>
+                <p>{{ experiment.objective }}</p>
+            </div>
 
-                    <!-- Multiple Images -->
-                    {% if experiment.images.exists %}
-                    <div class="mb-4">
-                        <h5 class="text-info">Experiment Images</h5>
-                        {% for img in experiment.images.all %}
-                            <img src="{{ img.image.url }}" alt="Experiment Image" class="img-fluid rounded border mb-3">
+           
+            <!-- Apparatus -->
+            <div class="mb-5">
+                <h5 class="text-info">Apparatus</h5>
+                {% if experiment.apparatus_items.all %}
+                    <div class="row g-4">
+                        {% for item in experiment.apparatus_items.all %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    {% if item.image %}
+                                        <div class="ratio ratio-4x3">
+                                            {% thumbnail item.image "400x300" crop="center" as thumb %}
+                                                <img src="{{ thumb.url }}" class="img-fluid rounded-top" loading="lazy" alt="{{ item.name }}">
+                                            {% endthumbnail %}
+                                        </div>
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                            <span class="text-muted">No Image</span>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title mb-0">{{ item.name }}</h6>
+                                    </div>
+                                </div>
+                            </div>
                         {% endfor %}
                     </div>
-                    {% endif %}
-                </div>
-
-                <!-- Right Column: Submit Report -->
-                <div class="col-md-4">
-                    <div class="bg-light p-4 rounded border shadow-sm">
-                        <h5 class="mb-3 text-success">Submit Report</h5>
-                        <p class="text-muted">Write and submit your observations, data, or attach a report file.</p>
-                        <a href="{% url 'bank:submit_report' experiment.id %}" class="btn btn-success btn-block">
-                            <i class="fas fa-edit mr-2"></i>Write & Submit Report
-                        </a>
-                    </div>
-                </div>
+                {% else %}
+                    <p class="text-muted">No apparatus items available for this experiment.</p>
+                {% endif %}
             </div>
+
+            <!-- Theory -->
+            <div class="mb-5">
+                <h5 class="text-info">Theory</h5>
+                <p>{{ experiment.theory }}</p>
+                {% with experiment.theoryimage_set.all as theory_images %}
+                    {% if theory_images %}
+                        <div class="row">
+                            {% for image in theory_images %}
+                                <div class="col-md-4 mb-3">
+                                    <img src="{{ image.image.url }}" loading="lazy" alt="Theory Image" title="Theory Image"
+                                         class="img-fluid rounded border">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Method / Procedure Steps -->
+            <!-- Method / Procedure Steps -->
+            <div class="mb-5">
+                <h5 class="text-info">Procedure</h5>
+
+                {% if experiment.method_summary %}
+                    <p class="fst-italic">{{ experiment.method_summary }}</p>
+                {% endif %}
+
+                {% if experiment.experimentstep_set.exists %}
+                    <ol class="list-group list-group-numbered">
+                        {% for step in experiment.experimentstep_set.all %}
+                            <li class="list-group-item mb-4">
+                                <h6 class="fw-bold text-primary">Step {{ step.step_number }}</h6>
+                                <p>{{ step.instruction }}</p>
+
+                                <!-- Image (if exists) -->
+                                {% if step.image %}
+                                    <img src="{{ step.image.url }}" loading="lazy" alt="Step {{ step.step_number }} Image"
+                                        class="img-fluid rounded border mb-2 shadow-sm">
+                                {% endif %}
+
+                                <!-- Local Video (if exists) -->
+                                {% if step.video %}
+                                    <video class="w-100 rounded border mb-2" controls preload="metadata">
+                                        <source src="{{ step.video.url }}" type="video/mp4">
+                                        <p>Your browser does not support the video tag.</p>
+                                    </video>
+                                {% endif %}
+
+                                <!-- External Video (if provided) -->
+                                {% if step.video_url %}
+                                    <a href="{{ step.video_url }}" target="_blank" class="btn btn-outline-info btn-sm">
+                                        <i class="fas fa-external-link-alt me-1"></i> Click To Watch  The video on Your Browser
+                                    </a>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <p class="text-muted">Procedure steps have not been added yet.</p>
+                {% endif %}
+            </div>
+
+
+            <!-- Optional External Video -->
+            {% if experiment.video_url %}
+                <div class="mb-5">
+                    <h5 class="text-info">External Demonstration</h5>
+                    <a href="{{ experiment.video_url }}" target="_blank" class="btn btn-outline-secondary">
+                        <i class="fas fa-video me-2"></i>View External Video
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Experimental Questions -->
+            {% if experiment.requires_questions and experiment.questions.all %}
+                <div class="mb-5">
+                    <h5 class="text-info">Experimental Questions</h5>
+                    <ul class="list-group">
+                        {% for question in experiment.questions.all %}
+                            <li class="list-group-item">
+                                {{ question.question_text }}
+                                <span class="badge bg-primary float-end">{{ question.marks }} marks</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- ✅ Draft Pad Section -->
+            <div class="mb-5 p-4 border rounded bg-white shadow-sm">
+                <h5 class="text-info">Draft Pad (Auto-saved)</h5>
+                <form id="draftForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ draft_form.observation.label_tag }} {{ draft_form.observation }}
+                    </div>
+                    <div class="mb-3">
+                        {{ draft_form.data.label_tag }} {{ draft_form.data }}
+                    </div>
+                    <div class="mb-3">
+                        {{ draft_form.image.label_tag }} {{ draft_form.image }}
+                        {% if draft.image %}
+                            <div class="mt-2">
+                                <img src="{{ draft.image.url }}" class="img-thumbnail" style="max-height: 150px;">
+                            </div>
+                        {% endif %}
+                    </div>
+                </form>
+                <small class="text-muted">All changes are saved automatically.</small>
+            </div>
+
+            <!-- Submit Report -->
+            {% if experiment.requires_report %}
+                <div class="mt-5 p-4 bg-light rounded border">
+                    <h5 class="mb-2 text-success">Submit Report</h5>
+                    <p class="text-muted">Write and submit your report based on the experiment above.</p>
+                    <a href="{% url 'bank:submit_report' experiment.id %}" class="btn btn-success">
+                        <i class="fas fa-edit me-2"></i>Write & Submit Report
+                    </a>
+                </div>
+            {% endif %}
+
         </div>
     </div>
+</div>
 
-    <!-- Floating Webcam Preview Overlay -->
-    <div id="webcam-overlay">
-        <video id="studentCam" autoplay muted playsinline></video>
-    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('draftForm');
+    const observation = form.querySelector('#id_observation');
+    const data = form.querySelector('#id_data');
+    const image = form.querySelector('#id_image');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    <style>
-        #webcam-overlay {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 200px;
-            height: 150px;
-            z-index: 9999;
-            border: 2px solid #28a745;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #000;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
+    let timeoutId;
 
-        #webcam-overlay video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
+    function autoSave() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            const formData = new FormData();
+            formData.append('observation', observation.value);
+            formData.append('data', data.value);
+            if (image.files.length > 0) {
+                formData.append('image', image.files[0]);
+            }
 
-    <script>
-        const video = document.getElementById('studentCam');
-
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-            .then(stream => {
-                video.srcObject = stream;
+            fetch(`/experiment/{{ experiment.id }}/auto_save_draft/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken  // ✅ fixed name
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'saved') {
+                    console.error('Auto-save failed', data.errors);
+                }
             })
             .catch(error => {
-                console.error('Webcam access error:', error);
-                document.getElementById('webcam-overlay').innerHTML = "<p class='text-danger p-2'>Webcam access blocked</p>";
+                console.error('[Auto-Save Error]', error);
             });
-    </script>
-</div>
+
+        }, 1000); // Save after 1 second pause
+    }
+
+    observation.addEventListener('input', autoSave);
+    data.addEventListener('input', autoSave);
+    image.addEventListener('change', autoSave);
+});
+</script>
+<script>
+    console.log("Draft URL: /experiment/{{ experiment.id }}/auto_save_draft/");
+</script>
+
+
 {% endblock %}

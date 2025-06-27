@@ -1,0 +1,65 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <style>
+    .nav-tabs .nav-link.active {
+      background-color: #f8f9fa;
+      border-color: #dee2e6 #dee2e6 #fff;
+    }
+    .tab-content {
+      padding-top: 15px;
+    }
+  </style>
+{% endblock %}
+
+{% block after_related_objects %}
+
+  <div class="tab-content" id="experimentTabContent">
+    <div class="tab-pane fade show active" id="general" role="tabpanel">
+
+    </div>
+    <div class="tab-pane fade" id="apparatus" role="tabpanel">
+      {% for inline_admin_formset in inline_admin_formsets %}
+        {% if inline_admin_formset.opts.model_name == 'apparatusitem' %}
+          {{ inline_admin_formset }}
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="tab-pane fade" id="theory" role="tabpanel">
+      {% for inline_admin_formset in inline_admin_formsets %}
+        {% if inline_admin_formset.opts.model_name == 'theoryimage' %}
+          {{ inline_admin_formset }}
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="tab-pane fade" id="steps" role="tabpanel">
+      {% for inline_admin_formset in inline_admin_formsets %}
+        {% if inline_admin_formset.opts.model_name == 'experimentstep' %}
+          {{ inline_admin_formset }}
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="tab-pane fade" id="questions" role="tabpanel">
+      {% for inline_admin_formset in inline_admin_formsets %}
+        {% if inline_admin_formset.opts.model_name == 'experimentquestion' %}
+          {{ inline_admin_formset }}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block extrajs %}
+  {{ block.super }}
+  <script>
+    window.addEventListener('load', function () {
+      // Use Bootstrap 4 jQuery tab toggling
+      $('#experimentTabs a[data-toggle="tab"]').on('click', function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+      });
+    });
+  </script>
+{% endblock %}

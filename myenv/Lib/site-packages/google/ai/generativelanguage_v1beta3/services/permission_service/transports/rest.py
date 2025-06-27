@@ -13,43 +13,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 import dataclasses
 import json  # type: ignore
-import re
+import logging
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import warnings
 
-from google.api_core import gapic_v1, path_template, rest_helpers, rest_streaming
 from google.api_core import exceptions as core_exceptions
+from google.api_core import gapic_v1, rest_helpers, rest_streaming
 from google.api_core import retry as retries
 from google.auth import credentials as ga_credentials  # type: ignore
-from google.auth.transport.grpc import SslCredentials  # type: ignore
 from google.auth.transport.requests import AuthorizedSession  # type: ignore
-from google.protobuf import json_format
-import grpc  # type: ignore
-from requests import __version__ as requests_version
-
-try:
-    OptionalRetry = Union[retries.Retry, gapic_v1.method._MethodDefault, None]
-except AttributeError:  # pragma: NO COVER
-    OptionalRetry = Union[retries.Retry, object, None]  # type: ignore
-
-
 from google.longrunning import operations_pb2  # type: ignore
 from google.protobuf import empty_pb2  # type: ignore
+from google.protobuf import json_format
+from requests import __version__ as requests_version
 
 from google.ai.generativelanguage_v1beta3.types import permission as gag_permission
 from google.ai.generativelanguage_v1beta3.types import permission
 from google.ai.generativelanguage_v1beta3.types import permission_service
 
 from .base import DEFAULT_CLIENT_INFO as BASE_DEFAULT_CLIENT_INFO
-from .base import PermissionServiceTransport
+from .rest_base import _BasePermissionServiceRestTransport
+
+try:
+    OptionalRetry = Union[retries.Retry, gapic_v1.method._MethodDefault, None]
+except AttributeError:  # pragma: NO COVER
+    OptionalRetry = Union[retries.Retry, object, None]  # type: ignore
+
+try:
+    from google.api_core import client_logging  # type: ignore
+
+    CLIENT_LOGGING_SUPPORTED = True  # pragma: NO COVER
+except ImportError:  # pragma: NO COVER
+    CLIENT_LOGGING_SUPPORTED = False
+
+_LOGGER = logging.getLogger(__name__)
 
 DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo(
     gapic_version=BASE_DEFAULT_CLIENT_INFO.gapic_version,
     grpc_version=None,
-    rest_version=requests_version,
+    rest_version=f"requests@{requests_version}",
 )
 
 
@@ -121,8 +125,11 @@ class PermissionServiceRestInterceptor:
     def pre_create_permission(
         self,
         request: permission_service.CreatePermissionRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[permission_service.CreatePermissionRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        permission_service.CreatePermissionRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for create_permission
 
         Override in a subclass to manipulate the request or metadata
@@ -144,8 +151,11 @@ class PermissionServiceRestInterceptor:
     def pre_delete_permission(
         self,
         request: permission_service.DeletePermissionRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[permission_service.DeletePermissionRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        permission_service.DeletePermissionRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for delete_permission
 
         Override in a subclass to manipulate the request or metadata
@@ -156,8 +166,10 @@ class PermissionServiceRestInterceptor:
     def pre_get_permission(
         self,
         request: permission_service.GetPermissionRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[permission_service.GetPermissionRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        permission_service.GetPermissionRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for get_permission
 
         Override in a subclass to manipulate the request or metadata
@@ -179,8 +191,11 @@ class PermissionServiceRestInterceptor:
     def pre_list_permissions(
         self,
         request: permission_service.ListPermissionsRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[permission_service.ListPermissionsRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        permission_service.ListPermissionsRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for list_permissions
 
         Override in a subclass to manipulate the request or metadata
@@ -202,8 +217,11 @@ class PermissionServiceRestInterceptor:
     def pre_transfer_ownership(
         self,
         request: permission_service.TransferOwnershipRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[permission_service.TransferOwnershipRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        permission_service.TransferOwnershipRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for transfer_ownership
 
         Override in a subclass to manipulate the request or metadata
@@ -225,8 +243,11 @@ class PermissionServiceRestInterceptor:
     def pre_update_permission(
         self,
         request: permission_service.UpdatePermissionRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[permission_service.UpdatePermissionRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        permission_service.UpdatePermissionRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for update_permission
 
         Override in a subclass to manipulate the request or metadata
@@ -253,8 +274,8 @@ class PermissionServiceRestStub:
     _interceptor: PermissionServiceRestInterceptor
 
 
-class PermissionServiceRestTransport(PermissionServiceTransport):
-    """REST backend transport for PermissionService.
+class PermissionServiceRestTransport(_BasePermissionServiceRestTransport):
+    """REST backend synchronous transport for PermissionService.
 
     Provides methods for managing permissions to PaLM API
     resources.
@@ -264,7 +285,6 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
     and call it.
 
     It sends JSON representations of protocol buffers over HTTP/1.1
-
     """
 
     def __init__(
@@ -318,21 +338,12 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
         # TODO(yon-mg): resolve other ctor params i.e. scopes, quota, etc.
         # TODO: When custom host (api_endpoint) is set, `scopes` must *also* be set on the
         # credentials object
-        maybe_url_match = re.match("^(?P<scheme>http(?:s)?://)?(?P<host>.*)$", host)
-        if maybe_url_match is None:
-            raise ValueError(
-                f"Unexpected hostname structure: {host}"
-            )  # pragma: NO COVER
-
-        url_match_items = maybe_url_match.groupdict()
-
-        host = f"{url_scheme}://{host}" if not url_match_items["scheme"] else host
-
         super().__init__(
             host=host,
             credentials=credentials,
             client_info=client_info,
             always_use_jwt_access=always_use_jwt_access,
+            url_scheme=url_scheme,
             api_audience=api_audience,
         )
         self._session = AuthorizedSession(
@@ -343,19 +354,35 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
         self._interceptor = interceptor or PermissionServiceRestInterceptor()
         self._prep_wrapped_messages(client_info)
 
-    class _CreatePermission(PermissionServiceRestStub):
+    class _CreatePermission(
+        _BasePermissionServiceRestTransport._BaseCreatePermission,
+        PermissionServiceRestStub,
+    ):
         def __hash__(self):
-            return hash("CreatePermission")
+            return hash("PermissionServiceRestTransport.CreatePermission")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, Any] = {}
-
-        @classmethod
-        def _get_unset_required_fields(cls, message_dict):
-            return {
-                k: v
-                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
-                if k not in message_dict
-            }
+        @staticmethod
+        def _get_response(
+            host,
+            metadata,
+            query_params,
+            session,
+            timeout,
+            transcoded_request,
+            body=None,
+        ):
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+            headers = dict(metadata)
+            headers["Content-Type"] = "application/json"
+            response = getattr(session, method)(
+                "{host}{uri}".format(host=host, uri=uri),
+                timeout=timeout,
+                headers=headers,
+                params=rest_helpers.flatten_query_params(query_params, strict=True),
+                data=body,
+            )
+            return response
 
         def __call__(
             self,
@@ -363,7 +390,7 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> gag_permission.Permission:
             r"""Call the create permission method over HTTP.
 
@@ -373,8 +400,10 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.gag_permission.Permission:
@@ -395,56 +424,71 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 role is a superset of the previous
                 role's permitted operations:
 
-                - reader can use the resource (e.g.
+                 - reader can use the resource (e.g.
                   tuned model) for inference
-                - writer has reader's permissions and
+                 - writer has reader's permissions and
                   additionally can edit and share
-                - owner has writer's permissions and
+                 - owner has writer's permissions and
                   additionally can delete
 
             """
 
-            http_options: List[Dict[str, str]] = [
-                {
-                    "method": "post",
-                    "uri": "/v1beta3/{parent=tunedModels/*}/permissions",
-                    "body": "permission",
-                },
-            ]
+            http_options = (
+                _BasePermissionServiceRestTransport._BaseCreatePermission._get_http_options()
+            )
+
             request, metadata = self._interceptor.pre_create_permission(
                 request, metadata
             )
-            pb_request = permission_service.CreatePermissionRequest.pb(request)
-            transcoded_request = path_template.transcode(http_options, pb_request)
-
-            # Jsonify the request body
-
-            body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=True
+            transcoded_request = _BasePermissionServiceRestTransport._BaseCreatePermission._get_transcoded_request(
+                http_options, request
             )
-            uri = transcoded_request["uri"]
-            method = transcoded_request["method"]
+
+            body = _BasePermissionServiceRestTransport._BaseCreatePermission._get_request_body_json(
+                transcoded_request
+            )
 
             # Jsonify the query params
-            query_params = json.loads(
-                json_format.MessageToJson(
-                    transcoded_request["query_params"],
-                    use_integers_for_enums=True,
-                )
+            query_params = _BasePermissionServiceRestTransport._BaseCreatePermission._get_query_params_json(
+                transcoded_request
             )
-            query_params.update(self._get_unset_required_fields(query_params))
 
-            query_params["$alt"] = "json;enum-encoding=int"
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.ai.generativelanguage_v1beta3.PermissionServiceClient.CreatePermission",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "CreatePermission",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
-            headers = dict(metadata)
-            headers["Content-Type"] = "application/json"
-            response = getattr(self._session, method)(
-                "{host}{uri}".format(host=self._host, uri=uri),
-                timeout=timeout,
-                headers=headers,
-                params=rest_helpers.flatten_query_params(query_params, strict=True),
-                data=body,
+            response = PermissionServiceRestTransport._CreatePermission._get_response(
+                self._host,
+                metadata,
+                query_params,
+                self._session,
+                timeout,
+                transcoded_request,
+                body,
             )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
@@ -457,22 +501,59 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             pb_resp = gag_permission.Permission.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_create_permission(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = gag_permission.Permission.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.ai.generativelanguage_v1beta3.PermissionServiceClient.create_permission",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "CreatePermission",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
-    class _DeletePermission(PermissionServiceRestStub):
+    class _DeletePermission(
+        _BasePermissionServiceRestTransport._BaseDeletePermission,
+        PermissionServiceRestStub,
+    ):
         def __hash__(self):
-            return hash("DeletePermission")
+            return hash("PermissionServiceRestTransport.DeletePermission")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, Any] = {}
-
-        @classmethod
-        def _get_unset_required_fields(cls, message_dict):
-            return {
-                k: v
-                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
-                if k not in message_dict
-            }
+        @staticmethod
+        def _get_response(
+            host,
+            metadata,
+            query_params,
+            session,
+            timeout,
+            transcoded_request,
+            body=None,
+        ):
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+            headers = dict(metadata)
+            headers["Content-Type"] = "application/json"
+            response = getattr(session, method)(
+                "{host}{uri}".format(host=host, uri=uri),
+                timeout=timeout,
+                headers=headers,
+                params=rest_helpers.flatten_query_params(query_params, strict=True),
+            )
+            return response
 
         def __call__(
             self,
@@ -480,7 +561,7 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ):
             r"""Call the delete permission method over HTTP.
 
@@ -490,44 +571,63 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
             """
 
-            http_options: List[Dict[str, str]] = [
-                {
-                    "method": "delete",
-                    "uri": "/v1beta3/{name=tunedModels/*/permissions/*}",
-                },
-            ]
+            http_options = (
+                _BasePermissionServiceRestTransport._BaseDeletePermission._get_http_options()
+            )
+
             request, metadata = self._interceptor.pre_delete_permission(
                 request, metadata
             )
-            pb_request = permission_service.DeletePermissionRequest.pb(request)
-            transcoded_request = path_template.transcode(http_options, pb_request)
-
-            uri = transcoded_request["uri"]
-            method = transcoded_request["method"]
+            transcoded_request = _BasePermissionServiceRestTransport._BaseDeletePermission._get_transcoded_request(
+                http_options, request
+            )
 
             # Jsonify the query params
-            query_params = json.loads(
-                json_format.MessageToJson(
-                    transcoded_request["query_params"],
-                    use_integers_for_enums=True,
-                )
+            query_params = _BasePermissionServiceRestTransport._BaseDeletePermission._get_query_params_json(
+                transcoded_request
             )
-            query_params.update(self._get_unset_required_fields(query_params))
 
-            query_params["$alt"] = "json;enum-encoding=int"
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.ai.generativelanguage_v1beta3.PermissionServiceClient.DeletePermission",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "DeletePermission",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
-            headers = dict(metadata)
-            headers["Content-Type"] = "application/json"
-            response = getattr(self._session, method)(
-                "{host}{uri}".format(host=self._host, uri=uri),
-                timeout=timeout,
-                headers=headers,
-                params=rest_helpers.flatten_query_params(query_params, strict=True),
+            response = PermissionServiceRestTransport._DeletePermission._get_response(
+                self._host,
+                metadata,
+                query_params,
+                self._session,
+                timeout,
+                transcoded_request,
             )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
@@ -535,19 +635,34 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             if response.status_code >= 400:
                 raise core_exceptions.from_http_response(response)
 
-    class _GetPermission(PermissionServiceRestStub):
+    class _GetPermission(
+        _BasePermissionServiceRestTransport._BaseGetPermission,
+        PermissionServiceRestStub,
+    ):
         def __hash__(self):
-            return hash("GetPermission")
+            return hash("PermissionServiceRestTransport.GetPermission")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, Any] = {}
-
-        @classmethod
-        def _get_unset_required_fields(cls, message_dict):
-            return {
-                k: v
-                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
-                if k not in message_dict
-            }
+        @staticmethod
+        def _get_response(
+            host,
+            metadata,
+            query_params,
+            session,
+            timeout,
+            transcoded_request,
+            body=None,
+        ):
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+            headers = dict(metadata)
+            headers["Content-Type"] = "application/json"
+            response = getattr(session, method)(
+                "{host}{uri}".format(host=host, uri=uri),
+                timeout=timeout,
+                headers=headers,
+                params=rest_helpers.flatten_query_params(query_params, strict=True),
+            )
+            return response
 
         def __call__(
             self,
@@ -555,7 +670,7 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> permission.Permission:
             r"""Call the get permission method over HTTP.
 
@@ -566,8 +681,10 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.permission.Permission:
@@ -588,47 +705,64 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 role is a superset of the previous
                 role's permitted operations:
 
-                - reader can use the resource (e.g.
+                 - reader can use the resource (e.g.
                   tuned model) for inference
-                - writer has reader's permissions and
+                 - writer has reader's permissions and
                   additionally can edit and share
-                - owner has writer's permissions and
+                 - owner has writer's permissions and
                   additionally can delete
 
             """
 
-            http_options: List[Dict[str, str]] = [
-                {
-                    "method": "get",
-                    "uri": "/v1beta3/{name=tunedModels/*/permissions/*}",
-                },
-            ]
-            request, metadata = self._interceptor.pre_get_permission(request, metadata)
-            pb_request = permission_service.GetPermissionRequest.pb(request)
-            transcoded_request = path_template.transcode(http_options, pb_request)
+            http_options = (
+                _BasePermissionServiceRestTransport._BaseGetPermission._get_http_options()
+            )
 
-            uri = transcoded_request["uri"]
-            method = transcoded_request["method"]
+            request, metadata = self._interceptor.pre_get_permission(request, metadata)
+            transcoded_request = _BasePermissionServiceRestTransport._BaseGetPermission._get_transcoded_request(
+                http_options, request
+            )
 
             # Jsonify the query params
-            query_params = json.loads(
-                json_format.MessageToJson(
-                    transcoded_request["query_params"],
-                    use_integers_for_enums=True,
-                )
+            query_params = _BasePermissionServiceRestTransport._BaseGetPermission._get_query_params_json(
+                transcoded_request
             )
-            query_params.update(self._get_unset_required_fields(query_params))
 
-            query_params["$alt"] = "json;enum-encoding=int"
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.ai.generativelanguage_v1beta3.PermissionServiceClient.GetPermission",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "GetPermission",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
-            headers = dict(metadata)
-            headers["Content-Type"] = "application/json"
-            response = getattr(self._session, method)(
-                "{host}{uri}".format(host=self._host, uri=uri),
-                timeout=timeout,
-                headers=headers,
-                params=rest_helpers.flatten_query_params(query_params, strict=True),
+            response = PermissionServiceRestTransport._GetPermission._get_response(
+                self._host,
+                metadata,
+                query_params,
+                self._session,
+                timeout,
+                transcoded_request,
             )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
@@ -641,22 +775,59 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             pb_resp = permission.Permission.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_get_permission(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = permission.Permission.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.ai.generativelanguage_v1beta3.PermissionServiceClient.get_permission",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "GetPermission",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
-    class _ListPermissions(PermissionServiceRestStub):
+    class _ListPermissions(
+        _BasePermissionServiceRestTransport._BaseListPermissions,
+        PermissionServiceRestStub,
+    ):
         def __hash__(self):
-            return hash("ListPermissions")
+            return hash("PermissionServiceRestTransport.ListPermissions")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, Any] = {}
-
-        @classmethod
-        def _get_unset_required_fields(cls, message_dict):
-            return {
-                k: v
-                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
-                if k not in message_dict
-            }
+        @staticmethod
+        def _get_response(
+            host,
+            metadata,
+            query_params,
+            session,
+            timeout,
+            transcoded_request,
+            body=None,
+        ):
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+            headers = dict(metadata)
+            headers["Content-Type"] = "application/json"
+            response = getattr(session, method)(
+                "{host}{uri}".format(host=host, uri=uri),
+                timeout=timeout,
+                headers=headers,
+                params=rest_helpers.flatten_query_params(query_params, strict=True),
+            )
+            return response
 
         def __call__(
             self,
@@ -664,7 +835,7 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> permission_service.ListPermissionsResponse:
             r"""Call the list permissions method over HTTP.
 
@@ -674,8 +845,10 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.permission_service.ListPermissionsResponse:
@@ -684,40 +857,57 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [
-                {
-                    "method": "get",
-                    "uri": "/v1beta3/{parent=tunedModels/*}/permissions",
-                },
-            ]
+            http_options = (
+                _BasePermissionServiceRestTransport._BaseListPermissions._get_http_options()
+            )
+
             request, metadata = self._interceptor.pre_list_permissions(
                 request, metadata
             )
-            pb_request = permission_service.ListPermissionsRequest.pb(request)
-            transcoded_request = path_template.transcode(http_options, pb_request)
-
-            uri = transcoded_request["uri"]
-            method = transcoded_request["method"]
+            transcoded_request = _BasePermissionServiceRestTransport._BaseListPermissions._get_transcoded_request(
+                http_options, request
+            )
 
             # Jsonify the query params
-            query_params = json.loads(
-                json_format.MessageToJson(
-                    transcoded_request["query_params"],
-                    use_integers_for_enums=True,
-                )
+            query_params = _BasePermissionServiceRestTransport._BaseListPermissions._get_query_params_json(
+                transcoded_request
             )
-            query_params.update(self._get_unset_required_fields(query_params))
 
-            query_params["$alt"] = "json;enum-encoding=int"
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.ai.generativelanguage_v1beta3.PermissionServiceClient.ListPermissions",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "ListPermissions",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
-            headers = dict(metadata)
-            headers["Content-Type"] = "application/json"
-            response = getattr(self._session, method)(
-                "{host}{uri}".format(host=self._host, uri=uri),
-                timeout=timeout,
-                headers=headers,
-                params=rest_helpers.flatten_query_params(query_params, strict=True),
+            response = PermissionServiceRestTransport._ListPermissions._get_response(
+                self._host,
+                metadata,
+                query_params,
+                self._session,
+                timeout,
+                transcoded_request,
             )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
@@ -730,22 +920,62 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             pb_resp = permission_service.ListPermissionsResponse.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_list_permissions(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = (
+                        permission_service.ListPermissionsResponse.to_json(response)
+                    )
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.ai.generativelanguage_v1beta3.PermissionServiceClient.list_permissions",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "ListPermissions",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
-    class _TransferOwnership(PermissionServiceRestStub):
+    class _TransferOwnership(
+        _BasePermissionServiceRestTransport._BaseTransferOwnership,
+        PermissionServiceRestStub,
+    ):
         def __hash__(self):
-            return hash("TransferOwnership")
+            return hash("PermissionServiceRestTransport.TransferOwnership")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, Any] = {}
-
-        @classmethod
-        def _get_unset_required_fields(cls, message_dict):
-            return {
-                k: v
-                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
-                if k not in message_dict
-            }
+        @staticmethod
+        def _get_response(
+            host,
+            metadata,
+            query_params,
+            session,
+            timeout,
+            transcoded_request,
+            body=None,
+        ):
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+            headers = dict(metadata)
+            headers["Content-Type"] = "application/json"
+            response = getattr(session, method)(
+                "{host}{uri}".format(host=host, uri=uri),
+                timeout=timeout,
+                headers=headers,
+                params=rest_helpers.flatten_query_params(query_params, strict=True),
+                data=body,
+            )
+            return response
 
         def __call__(
             self,
@@ -753,7 +983,7 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> permission_service.TransferOwnershipResponse:
             r"""Call the transfer ownership method over HTTP.
 
@@ -764,55 +994,72 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.permission_service.TransferOwnershipResponse:
                     Response from ``TransferOwnership``.
             """
 
-            http_options: List[Dict[str, str]] = [
-                {
-                    "method": "post",
-                    "uri": "/v1beta3/{name=tunedModels/*}:transferOwnership",
-                    "body": "*",
-                },
-            ]
+            http_options = (
+                _BasePermissionServiceRestTransport._BaseTransferOwnership._get_http_options()
+            )
+
             request, metadata = self._interceptor.pre_transfer_ownership(
                 request, metadata
             )
-            pb_request = permission_service.TransferOwnershipRequest.pb(request)
-            transcoded_request = path_template.transcode(http_options, pb_request)
-
-            # Jsonify the request body
-
-            body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=True
+            transcoded_request = _BasePermissionServiceRestTransport._BaseTransferOwnership._get_transcoded_request(
+                http_options, request
             )
-            uri = transcoded_request["uri"]
-            method = transcoded_request["method"]
+
+            body = _BasePermissionServiceRestTransport._BaseTransferOwnership._get_request_body_json(
+                transcoded_request
+            )
 
             # Jsonify the query params
-            query_params = json.loads(
-                json_format.MessageToJson(
-                    transcoded_request["query_params"],
-                    use_integers_for_enums=True,
-                )
+            query_params = _BasePermissionServiceRestTransport._BaseTransferOwnership._get_query_params_json(
+                transcoded_request
             )
-            query_params.update(self._get_unset_required_fields(query_params))
 
-            query_params["$alt"] = "json;enum-encoding=int"
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.ai.generativelanguage_v1beta3.PermissionServiceClient.TransferOwnership",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "TransferOwnership",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
-            headers = dict(metadata)
-            headers["Content-Type"] = "application/json"
-            response = getattr(self._session, method)(
-                "{host}{uri}".format(host=self._host, uri=uri),
-                timeout=timeout,
-                headers=headers,
-                params=rest_helpers.flatten_query_params(query_params, strict=True),
-                data=body,
+            response = PermissionServiceRestTransport._TransferOwnership._get_response(
+                self._host,
+                metadata,
+                query_params,
+                self._session,
+                timeout,
+                transcoded_request,
+                body,
             )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
@@ -825,24 +1072,62 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             pb_resp = permission_service.TransferOwnershipResponse.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_transfer_ownership(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = (
+                        permission_service.TransferOwnershipResponse.to_json(response)
+                    )
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.ai.generativelanguage_v1beta3.PermissionServiceClient.transfer_ownership",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "TransferOwnership",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
-    class _UpdatePermission(PermissionServiceRestStub):
+    class _UpdatePermission(
+        _BasePermissionServiceRestTransport._BaseUpdatePermission,
+        PermissionServiceRestStub,
+    ):
         def __hash__(self):
-            return hash("UpdatePermission")
+            return hash("PermissionServiceRestTransport.UpdatePermission")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, Any] = {
-            "updateMask": {},
-        }
-
-        @classmethod
-        def _get_unset_required_fields(cls, message_dict):
-            return {
-                k: v
-                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
-                if k not in message_dict
-            }
+        @staticmethod
+        def _get_response(
+            host,
+            metadata,
+            query_params,
+            session,
+            timeout,
+            transcoded_request,
+            body=None,
+        ):
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+            headers = dict(metadata)
+            headers["Content-Type"] = "application/json"
+            response = getattr(session, method)(
+                "{host}{uri}".format(host=host, uri=uri),
+                timeout=timeout,
+                headers=headers,
+                params=rest_helpers.flatten_query_params(query_params, strict=True),
+                data=body,
+            )
+            return response
 
         def __call__(
             self,
@@ -850,7 +1135,7 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> gag_permission.Permission:
             r"""Call the update permission method over HTTP.
 
@@ -860,8 +1145,10 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.gag_permission.Permission:
@@ -882,56 +1169,71 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
                 role is a superset of the previous
                 role's permitted operations:
 
-                - reader can use the resource (e.g.
+                 - reader can use the resource (e.g.
                   tuned model) for inference
-                - writer has reader's permissions and
+                 - writer has reader's permissions and
                   additionally can edit and share
-                - owner has writer's permissions and
+                 - owner has writer's permissions and
                   additionally can delete
 
             """
 
-            http_options: List[Dict[str, str]] = [
-                {
-                    "method": "patch",
-                    "uri": "/v1beta3/{permission.name=tunedModels/*/permissions/*}",
-                    "body": "permission",
-                },
-            ]
+            http_options = (
+                _BasePermissionServiceRestTransport._BaseUpdatePermission._get_http_options()
+            )
+
             request, metadata = self._interceptor.pre_update_permission(
                 request, metadata
             )
-            pb_request = permission_service.UpdatePermissionRequest.pb(request)
-            transcoded_request = path_template.transcode(http_options, pb_request)
-
-            # Jsonify the request body
-
-            body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=True
+            transcoded_request = _BasePermissionServiceRestTransport._BaseUpdatePermission._get_transcoded_request(
+                http_options, request
             )
-            uri = transcoded_request["uri"]
-            method = transcoded_request["method"]
+
+            body = _BasePermissionServiceRestTransport._BaseUpdatePermission._get_request_body_json(
+                transcoded_request
+            )
 
             # Jsonify the query params
-            query_params = json.loads(
-                json_format.MessageToJson(
-                    transcoded_request["query_params"],
-                    use_integers_for_enums=True,
-                )
+            query_params = _BasePermissionServiceRestTransport._BaseUpdatePermission._get_query_params_json(
+                transcoded_request
             )
-            query_params.update(self._get_unset_required_fields(query_params))
 
-            query_params["$alt"] = "json;enum-encoding=int"
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.ai.generativelanguage_v1beta3.PermissionServiceClient.UpdatePermission",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "UpdatePermission",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
-            headers = dict(metadata)
-            headers["Content-Type"] = "application/json"
-            response = getattr(self._session, method)(
-                "{host}{uri}".format(host=self._host, uri=uri),
-                timeout=timeout,
-                headers=headers,
-                params=rest_helpers.flatten_query_params(query_params, strict=True),
-                data=body,
+            response = PermissionServiceRestTransport._UpdatePermission._get_response(
+                self._host,
+                metadata,
+                query_params,
+                self._session,
+                timeout,
+                transcoded_request,
+                body,
             )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
@@ -944,7 +1246,29 @@ class PermissionServiceRestTransport(PermissionServiceTransport):
             pb_resp = gag_permission.Permission.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_update_permission(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = gag_permission.Permission.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.ai.generativelanguage_v1beta3.PermissionServiceClient.update_permission",
+                    extra={
+                        "serviceName": "google.ai.generativelanguage.v1beta3.PermissionService",
+                        "rpcName": "UpdatePermission",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     @property

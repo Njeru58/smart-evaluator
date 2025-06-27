@@ -6,10 +6,9 @@
 <div class="container my-5">
     <div class="jumbotron">
         <h2 class="text-center text-primary">
-  Welcome <span class="text-success fs-3">{{ user.username }}</span> to the Virtual Lab
-</h2>
-
-        <p class="text-center">Explore available virtual experiments below. Click an experiment to view details, watch the video, and read the manual.</p>
+            Welcome <span class="text-success fs-3">{{ user.username }}</span> to the Virtual Lab
+        </h2>
+        <p class="text-center">Explore available virtual experiments below. Click to view details, procedures, questions, and video demonstrations.</p>
     </div>
 
     <div class="row">
@@ -18,8 +17,19 @@
                 {% for experiment in experiments %}
                     <a href="{% url 'bank:experiment_detail' experiment.id %}"
                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        {{ experiment.title }}
-                        <span class="badge badge-info badge-pill">View</span>
+                        <div>
+                            <strong>{{ experiment.title }}</strong>
+                            <div class="text-muted small">{{ experiment.code }}</div>
+                        </div>
+                        <div>
+                            {% if experiment.requires_report %}
+                                <span class="badge bg-primary">Report</span>
+                            {% endif %}
+                            {% if experiment.requires_questions %}
+                                <span class="badge bg-warning text-dark">Questions</span>
+                            {% endif %}
+                            <span class="badge bg-info">View</span>
+                        </div>
                     </a>
                 {% empty %}
                     <p class="text-center">No experiments available at the moment.</p>

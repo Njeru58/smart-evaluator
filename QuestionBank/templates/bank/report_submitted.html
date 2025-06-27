@@ -5,27 +5,119 @@
 
 {% block content %}
 <div class="container my-5">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
     <div class="card shadow-sm">
         <div class="card-body">
             <h3 class="card-title text-success text-center">
                 <i class="fas fa-check-circle"></i> Report Submitted!
             </h3>
-            <p class="text-center">Below is a recap of your submission:</p>
+
+            <p class="text-center text-muted">
+                Submitted on <strong>{{ report.submitted_at|date:"F d, Y @ h:i A" }}</strong>
+            </p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
 
             <hr>
 
             <div class="mb-4">
                 <h5>Experiment: <span class="text-primary">{{ experiment.title }}</span></h5>
                 <p><strong>Description:</strong> {{ experiment.description }}</p>
+            </div>
+
+            {# ---- Report Fields ---- #}
+            <div class="mb-4">
+                <h5 class="text-secondary">Submitted Report Details:</h5>
+
+                {% if report.group_members %}
+                <div class="mb-3">
+                    <strong>Group Members:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.group_members }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.objective %}
+                <div class="mb-3">
+                    <strong>Aim/Objectives:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.objective }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.theory %}
+                <div class="mb-3">
+                    <strong>Theory:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.theory }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.apparatus_scope %}
+                <div class="mb-3">
+                    <strong>Apparatus Used:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.apparatus_scope }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.procedure %}
+                <div class="mb-3">
+                    <strong>Procedure:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.procedure }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.results %}
+                <div class="mb-3">
+                    <strong>Results:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.results }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.data_analysis %}
+                <div class="mb-3">
+                    <strong>Data & Error Analysis:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.data_analysis }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.discussion %}
+                <div class="mb-3">
+                    <strong>Discussion:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.discussion }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.conclusion %}
+                <div class="mb-3">
+                    <strong>Conclusion:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.conclusion }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.references %}
+                <div class="mb-3">
+                    <strong>References:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.references }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.observation %}
+                <div class="mb-3">
+                    <strong>Observation:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.observation }}</div>
+                </div>
+                {% endif %}
+
+                {% if report.data %}
+                <div class="mb-3">
+                    <strong>Experimental Data:</strong>
+                    <div class="border rounded p-2 bg-light">{{ report.data }}</div>
+                </div>
+                {% endif %}
             </div>
 
             {# ---- Student Answers Section ---- #}
@@ -45,27 +137,16 @@
                 </div>
             {% endif %}
 
-            {# ---- Report Fields ---- #}
-            <div class="mb-4">
-                <h5 class="text-secondary">Your Observations:</h5>
-                <div class="border rounded p-3 bg-light">{{ report.observation }}</div>
-            </div>
-
-            <div class="mb-4">
-                <h5 class="text-secondary">Experimental Data:</h5>
-                <div class="border rounded p-3 bg-light">{{ report.data }}</div>
-            </div>
-
             {% if report.report_file %}
-            <div class="mb-4">
-                <h5 class="text-secondary">Attached Report File:</h5>
-                <a href="{{ report.report_file.url }}" target="_blank" class="btn btn-sm btn-outline-success">
-                    <i class="fas fa-file-download"></i> Download File
-                </a>
-            </div>
+                <div class="mb-4">
+                    <h5 class="text-secondary">Attached Report File:</h5>
+                    <a href="{{ report.report_file.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-file-download"></i> Download File
+                    </a>
+                </div>
             {% endif %}
 
-            <div class="mt-4">
+            <div class="mt-4 text-center">
                 <a href="{% url 'bank:experiment_list' %}" class="btn btn-outline-primary">
                     <i class="fas fa-arrow-left"></i> Back to Experiments
                 </a>

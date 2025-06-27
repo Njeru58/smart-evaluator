@@ -24,24 +24,51 @@
         <div class="container">
             <h1><a href="{% url 'bank:user_home' %}" class="navbar-brand">
             <strong>Question Bank</strong></a></h1>
-            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            {% comment %} <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button> {% endcomment %}
+            <style>
+            @keyframes wigglePulse {
+                0% { transform: scale(1) rotate(0deg); }
+                25% { transform: scale(1.05) rotate(-5deg); }
+                50% { transform: scale(1.1) rotate(5deg); }
+                75% { transform: scale(1.05) rotate(-5deg); }
+                100% { transform: scale(1) rotate(0deg); }
+            }
+
+            .wiggle-pulse {
+                animation: wigglePulse 1.2s ease-in-out 1;
+            }
+
+            @media (min-width: 768px) {
+                .mobile-menu-label {
+                display: none;
+                }
+            }
+            </style>
+
+            <button type="button" class="navbar-toggler wiggle-pulse d-flex align-items-center" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon mr-2"></span>
+                <span class="text-white mobile-menu-label">Menu</span>
+            </button>
+
             <div class="collapse navbar-collapse justify-content-end " id="navbar">
                 {% if not request.user.is_active %}
                 <a href="{% url 'bank:login' %}" class="btn btn-success mt-1 ml-2"><i class="fa fa-sign-in" aria-hidden="true"></i> Log In</a>
                 {% else %}
                 <h6 class="text-white mt-2 mr-2">Welcome, {{ request.user.username }}</h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:user_home' %}" class="text-info">Dashboard</a></h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:user_home' %}" class="text-info"><i class="fa fa-home"></i> Dashboard</a></h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:generate_quiz' %}" class="text-info">Test </a></h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:generate_quiz' %}" class="text-info"> <i class="fa fa-pencil"></i> Test </a></h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:list_attempts' %}" class="text-success">Attempts</a></h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:list_attempts' %}" class="text-success"><i class="fa fa-history"></i> Attempts</a></h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluator_ai' %}" class="text-success">EvaluatorAI</a></h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluator_ai' %}" class="text-info"><i class="fa fa-magic"></i> EvaluatorAI</a></h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluated_responses' %}" class="text-success">Evaluator Scores</a></h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:evaluated_responses' %}" class="text-success"><i class="fa fa-star"></i> Evaluator Scores</a></h6>
                 <h6 class="text-light mt-2 mr-2">|</h6>
-                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:experiment_list' %}" class="text-success">Virtual Lab</a></h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:experiment_list' %}" class="text-info"><i class="fa fa-flask"></i> Virtual Lab</a></h6>
+                <h6 class="text-light mt-2 mr-2">|</h6>
+                <h6 class="text-white mt-2 mr-2"><a href="{% url 'bank:report_list' %}" class="text-success"><i class="fa fa-file-text-o"></i> My Reports</a></h6>
 
                 {% if request.user.is_superuser %}
                 <h6 class="text-light mt-2 mr-2">|</h6>
@@ -68,6 +95,7 @@
     </footer>
 
     <!-- jQuery first, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{% static 'assets/js/vendor/jquery-3.2.1.slim.min.js' %}" ></script>
     <script src="{% static 'assets/js/vendor/popper.min.js' %}" ></script>
     <script src="{% static 'assets/js/vendor/bootstrap.min.js' %}" ></script>

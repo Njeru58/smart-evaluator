@@ -1,0 +1,189 @@
+{% extends 'layout/base.html' %}
+{% block title %}Lab Report: {{ report.experiment.title }}{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-3"><i class="fa fa-flask"></i> Report for: {{ report.experiment.title }}</h3>
+    <p><strong>Submitted:</strong> {{ report.submitted_at|date:"M d, Y H:i" }}</p>
+
+    <!-- Evaluation Scores -->
+    {% if report.evaluation %}
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <i class="fa fa-chart-bar"></i> Evaluation Summary
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for section, score in report.evaluation.scores.items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>{{ section|capfirst }}</strong>
+                {% if score >= 8 %}
+                <span class="badge rounded-pill bg-success px-3 py-2 fs-6">{{ score }}/10</span>
+                {% elif score >= 5 %}
+                <span class="badge rounded-pill bg-warning text-dark px-3 py-2 fs-6">{{ score }}/10</span>
+                {% else %}
+                <span class="badge rounded-pill bg-danger px-3 py-2 fs-6">{{ score }}/10</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+
+    </div>
+    {% else %}
+    <div class="alert alert-warning">This report has not been evaluated yet.</div>
+    {% endif %}
+
+    <!-- Submitted Report Content -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <i class="fa fa-file-alt"></i> Submitted Report Sections
+        </div>
+        <div class="card-body p-0">
+            <div id="reportAccordion">
+
+                {% comment %} Group Members {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading1">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#collapse1">
+                                <i class="fa fa-users mr-2"></i> Group Members
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse1" class="collapse show" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.group_members|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} Objective {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading2">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse2">
+                                <i class="fa fa-bullseye mr-2"></i> Objective
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse2" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.objective|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} Theory {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading3">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse3">
+                                <i class="fa fa-book mr-2"></i> Theory
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse3" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.theory|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} Apparatus Used {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading4">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse4">
+                                <i class="fa fa-tools mr-2"></i> Apparatus Used
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse4" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.apparatus_scope|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} Procedure {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading5">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse5">
+                                <i class="fa fa-list-ol mr-2"></i> Procedure
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse5" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.procedure|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} Results {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading6">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse6">
+                                <i class="fa fa-chart-line mr-2"></i> Results
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse6" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.results|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} Data & Error Analysis {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading7">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse7">
+                                <i class="fa fa-search mr-2"></i> Data & Error Analysis
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse7" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.data_analysis|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} Discussion {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading8">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse8">
+                                <i class="fa fa-comments mr-2"></i> Discussion
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse8" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.discussion|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} Conclusion {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading9">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse9">
+                                <i class="fa fa-check-circle mr-2"></i> Conclusion
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse9" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.conclusion|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+                {% comment %} References {% endcomment %}
+                <div class="card">
+                    <div class="card-header" id="heading10">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse10">
+                                <i class="fa fa-link mr-2"></i> References
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="collapse10" class="collapse" data-parent="#reportAccordion">
+                        <div class="card-body">{{ report.references|linebreaksbr }}</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

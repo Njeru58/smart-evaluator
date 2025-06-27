@@ -1,5 +1,5 @@
 import random
-
+from collections import defaultdict
 import json
 
 from django.contrib.auth import authenticate, login, logout
@@ -16,16 +16,20 @@ from .models import VirtualExperiment, ExperimentQuestion, ExperimentAnswer
 from django.http import HttpResponse
 from django.contrib import messages
 
+
+from django.utils import timezone
+from .models import ExperimentDraft
+from .forms import ExperimentDraftForm
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
 from .forms import ExperimentReportForm
 
-import base64
-from django.core.files.base import ContentFile
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+
+
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from datetime import datetime
+
 from django.urls import reverse
 from .models import Snapshot
 
@@ -350,28 +354,58 @@ def submit_answers_view(request):
 
     return HttpResponse('Method not allowed', status=405)
 
+
+
 @login_required
 def evaluated_responses(request):
-    student_responses = StudentResponse.objects.filter(student=request.user, submissions__evaluated=True).distinct()
+    student_responses = StudentResponse.objects.filter(
+        student=request.user,
+        submissions__evaluated=True
+    ).prefetch_related("submissions", "submissions__question").distinct()
 
-    evaluated_data = []
+    grouped_responses = defaultdict(list)
+    total_marks = 0
+    max_possible_marks = 0
+
     for response in student_responses:
-        submissions = response.submissions.filter(evaluated=True)
-        for submission in submissions:
-            evaluated_data.append({
-                'id': submission.id,
-                'answer': submission.answer,
-                'marks': submission.marks,
-                'evaluated_at': submission.evaluated_at,
-                'topic': submission.topic,  # ← changed this
-                'max_marks': submission.question.marks,
-            })
+        for submission in response.submissions.filter(evaluated=True):
+            grouped_responses[submission.topic].append(submission)
+            try:
+                total_marks += float(submission.marks)
+                max_possible_marks += float(submission.question.marks)
+            except:
+                continue  # If there's bad data, avoid crashing
 
     context = {
-        'evaluated_responses': evaluated_data,
+        'grouped_responses': dict(grouped_responses),  # Convert to normal dict for template compatibility
+        'total_marks': total_marks,
+        'max_possible_marks': max_possible_marks,
     }
     return render(request, 'bank/evaluator_results.html', context)
 
+@csrf_exempt
+@login_required
+def auto_save_report(request, experiment_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            experiment = get_object_or_404(VirtualExperiment, pk=experiment_id)
+            report, _ = ExperimentReport.objects.get_or_create(student=request.user, experiment=experiment)
+
+            # Update only if the key exists in model fields
+            for field in [
+                'group_members', 'objective', 'theory', 'apparatus_scope',
+                'procedure', 'results', 'data_analysis', 'discussion',
+                'conclusion', 'references', 'observation', 'data'
+            ]:
+                if field in data:
+                    setattr(report, field, data[field])
+            report.save()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    return JsonResponse({'status': 'invalid method'}, status=405)
 
 def log_tab_switch(request):
     if request.method == "POST":
@@ -412,76 +446,112 @@ class ExperimentListView(ListView):
     template_name = 'bank/experiment_list.html'
     context_object_name = 'experiments'
 
-class ExperimentDetailView(DetailView):
-    model = VirtualExperiment
-    template_name = 'bank/experiment_detail.html'
-    context_object_name = 'experiment'
+# class ExperimentDetailView(DetailView):
+#     model = VirtualExperiment
+#     template_name = 'bank/experiment_detail.html'
+#     context_object_name = 'experiment'
+
+
+
+
+@login_required
+def experiment_detail(request, pk):
+    experiment = get_object_or_404(VirtualExperiment, pk=pk)
+
+    # Get or create draft
+    draft, _ = ExperimentDraft.objects.get_or_create(
+        experiment=experiment,
+        student=request.user
+    )
+
+    form = ExperimentDraftForm(instance=draft)
+
+    context = {
+        'experiment': experiment,
+        'draft_form': form,
+        'draft': draft,
+    }
+
+    return render(request, 'bank/experiment_detail.html', context)
+
+
+
+@csrf_exempt
+@login_required
+def auto_save_draft(request, experiment_id):
+    if request.method == 'POST':
+        experiment = get_object_or_404(VirtualExperiment, id=experiment_id)
+        draft, _ = ExperimentDraft.objects.get_or_create(
+            experiment=experiment,
+            student=request.user
+        )
+        form = ExperimentDraftForm(request.POST, request.FILES, instance=draft)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'status': 'saved'})
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors})
 
 
 @login_required
 def submit_report(request, experiment_id):
     experiment = get_object_or_404(VirtualExperiment, pk=experiment_id)
-    
-    if request.method == 'POST':
-        observation = request.POST.get('observation', '').strip()
-        data = request.POST.get('data', '').strip()
-        report_file = request.FILES.get('report_file')
+    questions = experiment.questions.all()
 
-        if observation and data:
-            report = ExperimentReport.objects.create(
-                experiment=experiment,
-                student=request.user,
-                observation=observation,
-                data=data,
-                report_file=report_file
-            )
-            return redirect(reverse('bank:experiment_list'))
-        else:
-            error = "Please fill in both observation and data fields."
-            return render(request, 'bank/submit_report.html', {
-                'experiment': experiment,
-                'error': error,
-                'observation': observation,
-                'data': data,
-            })
-    else:
-        return render(request, 'bank/submit_report.html', {'experiment': experiment})
-    
-@login_required
-def submit_report(request, experiment_id):
-    experiment = get_object_or_404(VirtualExperiment, id=experiment_id)
-    questions = ExperimentQuestion.objects.filter(experiment=experiment)  # ✅ Fetch related questions
+    # Check for existing report or create one
+    report, created = ExperimentReport.objects.get_or_create(
+        student=request.user,
+        experiment=experiment,
+        defaults={'submitted_at': timezone.now()}
+    )
+
+    draft_loaded = False
+    draft = ExperimentDraft.objects.filter(experiment=experiment, student=request.user).last()
+
+    # If newly created and draft exists, preload values
+    if created and draft:
+        report.observation = draft.observation or ""
+        report.data = draft.data or ""
+        report.draft_used = draft
+        report.save()
+        draft_loaded = True
 
     if request.method == 'POST':
-        form = ExperimentReportForm(request.POST, request.FILES)
+        form = ExperimentReportForm(request.POST, request.FILES, instance=report)
         if form.is_valid():
-            report = form.save(commit=False)
-            report.experiment = experiment
-            report.student = request.user
-            report.save()
+            form.instance.submitted_at = timezone.now()
+            form.save()
 
-            # ✅ Handle submitted answers for experiment questions
+            # Save experiment question answers
             for question in questions:
-                answer_key = f"question_{question.id}"
-                answer_text = request.POST.get(answer_key)
-                if answer_text:
-                    ExperimentAnswer.objects.create(  # You need to define this model
-                        report=report,
-                        question=question,
-                        answer_text=answer_text
-                    )
+                answer_text = request.POST.get(f"question_{question.id}", "").strip()
+                ExperimentAnswer.objects.update_or_create(
+                    report=report,
+                    question=question,
+                    defaults={'answer_text': answer_text}
+                )
 
-            messages.success(request, f'Your report for "{experiment.title}" has been submitted successfully.')
-            return redirect('bank:report_submitted', experiment_id=experiment.id)
+            messages.success(request, "Your report was submitted successfully.")
+            return redirect('bank:report_submitted', experiment.id)
     else:
-        form = ExperimentReportForm()
+        form = ExperimentReportForm(instance=report)
+
+    # Load previously submitted answers
+    answers = {
+        ans.question.id: ans.answer_text
+        for ans in ExperimentAnswer.objects.filter(report=report)
+    }
 
     return render(request, 'bank/submit_report.html', {
-        'form': form,
         'experiment': experiment,
-        'questions': questions  # ✅ Inject questions into template
+        'form': form,
+        'questions': questions,
+        'report': report,
+        'report_answers': answers if request.method != 'POST' else request.POST,
+        'submitted': not created and report.submitted_at is not None,
+        'draft_loaded': draft_loaded
     })
-
+    
 @login_required
 def report_submitted(request, experiment_id):
     experiment = get_object_or_404(VirtualExperiment, id=experiment_id)
@@ -509,3 +579,16 @@ def report_submitted(request, experiment_id):
     }
 
     return render(request, 'bank/report_submitted.html', context)
+
+
+
+@login_required
+def my_evaluated_reports(request):
+    reports = ExperimentReport.objects.filter(student=request.user).prefetch_related('evaluation')
+    return render(request, 'bank/report_list.html', {'reports': reports})
+
+
+@login_required
+def view_report_detail(request, pk):
+    report = get_object_or_404(ExperimentReport, pk=pk, student=request.user)
+    return render(request, 'bank/report_detail.html', {'report': report})

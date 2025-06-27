@@ -24,9 +24,21 @@ urlpatterns = [
     path("log-tab-switch/", log_tab_switch, name="log_tab_switch"),
     path("save_snapshot/", views.save_snapshot, name="save_snapshot"),
     path('experiment_list/', views.ExperimentListView.as_view(), name='experiment_list'),
-    path('<int:pk>/', views.ExperimentDetailView.as_view(), name='experiment_detail'),
+    # path('<int:pk>/', views.ExperimentDetailView.as_view(), name='experiment_detail'),
+    # urls.py
+    path('<int:pk>/', views.experiment_detail, name='experiment_detail'),
+
+    path('experiment/<int:experiment_id>/auto_save_draft/', views.auto_save_draft, name='auto_save_draft'),
     path('experiment/<int:experiment_id>/submit_report/', views.submit_report, name='submit_report'),
-    path('report_submitted/<int:experiment_id>/', views.report_submitted, name='report_submitted'),
+    path('experiment/<int:experiment_id>/submitted/', views.report_submitted, name='report_submitted'),
+    path('experiment/<int:experiment_id>/auto_save_report/', views.auto_save_report, name='auto_save_report'),
+    path('my-reports/', views.my_evaluated_reports, name='report_list'),
+    path('my-reports/<int:pk>/', views.view_report_detail, name='report_detail'),
+
+    # path('experiment/<int:experiment_id>/submit_report/', views.submit_report, name='submit_report'),
+    # path('report_submitted/<int:experiment_id>/', views.report_submitted, name='report_submitted'),
+    # path('autosave-draft/<int:experiment_id>/', views.auto_save_draft, name='auto_save_draft'),
+
 
 ]
 
